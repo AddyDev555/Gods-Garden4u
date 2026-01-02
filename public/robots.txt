@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin and private paths
+Disallow: /account/
+Disallow: /checkout/
+
+# Sitemap
+Sitemap: https://godsgarden.com/sitemap.xml

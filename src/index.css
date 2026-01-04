@@ -364,6 +364,26 @@
   }
 }
 
+/* Scroller Fade Animation */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in-out {
+  animation: fadeInOut 2s ease-in-out;
+}
+
 /* Page Transition */
 .page-enter {
   opacity: 0;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { FiSearch } from 'react-icons/fi';
-import api from '../../api/axiosConfig';
+import api from '../../api/gods-garden/axiosConfig';
 import { SITE_NAME } from '../../utils/constants';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductGridSkeleton } from '../../components/common/Skeleton/Skeleton';
@@ -37,7 +37,7 @@ const Search = () => {
   return (
     <>
       <Helmet>
-        <title>Search: {query || 'Products'} | {SITE_NAME}</title>
+        <title>{`Search: ${query || 'Products'} | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

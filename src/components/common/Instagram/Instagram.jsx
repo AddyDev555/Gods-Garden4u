@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiInstagram } from 'react-icons/fi';
-import { getInstagramProfile } from '../../../api/productApi';
+import { getInstagramProfile } from '../../../api/gods-garden/productApi';
 
 const InstagramFeed = ({ limit = 6, className = '' }) => {
   const [posts, setPosts] = useState([]);

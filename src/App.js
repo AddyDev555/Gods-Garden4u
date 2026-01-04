@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import Scroller from './components/common/Scroller';
 import Navbar from './components/layout/Navbar/Navbar';
 import Footer from './components/layout/Footer/Footer';
 import ScrollToTop from './components/ui/ScrollToTop';
@@ -39,7 +40,10 @@ const NotFound = lazy(() => import(/* webpackChunkName: "notfound" */ './pages/N
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen pt-[96px] lg:pt-[112px]">
+      {/* Promotional Scroller */}
+      <Scroller />
+
       {/* Navigation */}
       <Navbar />
 

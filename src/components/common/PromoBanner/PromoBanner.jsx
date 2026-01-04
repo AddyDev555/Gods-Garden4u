@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiGift, FiCheck } from 'react-icons/fi';
-import { registerUserPromo } from '../../../api/userApi';
+import { registerUserPromo } from '../../../api/gods-garden/userApi';
 import { cn } from '../../../utils/helpers';
 
 const PromoBanner = ({ onClose }) => {

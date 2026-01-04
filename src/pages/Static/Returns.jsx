@@ -6,7 +6,7 @@ const Returns = () => {
   return (
     <>
       <Helmet>
-        <title>Return & Refund Policy | {SITE_NAME}</title>
+        <title>{`Return & Refund Policy | ${SITE_NAME}`}</title>
         <meta name="description" content={`${SITE_NAME} return and refund policy. Learn about our easy return process and refund guidelines.`} />
         <link rel="canonical" href={`${SITE_URL}/returns`} />
       </Helmet>

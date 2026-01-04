@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { FiMail, FiPhone, FiMapPin, FiClock } from 'react-icons/fi';
-import api from '../../api/axiosConfig';
+import api from '../../api/gods-garden/axiosConfig';
 import { useToast } from '../../components/common/Toast/Toast';
 import { SITE_NAME, SITE_URL, CONTACT_INFO } from '../../utils/constants';
 import Button from '../../components/common/Button/Button';
@@ -52,7 +52,7 @@ const ContactUs = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us | {SITE_NAME}</title>
+        <title>{`Contact Us | ${SITE_NAME}`}</title>
         <meta name="description" content={`Get in touch with ${SITE_NAME}. We're here to help with any questions or concerns.`} />
         <link rel="canonical" href={`${SITE_URL}/contact`} />
       </Helmet>

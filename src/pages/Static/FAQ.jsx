@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
-import api from '../../api/axiosConfig';
+import api from '../../api/gods-garden/axiosConfig';
 import { SITE_NAME, SITE_URL } from '../../utils/constants';
 import { getFAQSchema, serializeSchema } from '../../utils/structuredData';
 import { cn } from '../../utils/helpers';
@@ -37,7 +37,7 @@ const FAQ = () => {
   return (
     <>
       <Helmet>
-        <title>Frequently Asked Questions | {SITE_NAME}</title>
+        <title>{`Frequently Asked Questions | ${SITE_NAME}`}</title>
         <meta name="description" content={`Find answers to common questions about ${SITE_NAME} products, shipping, returns, and more.`} />
         <link rel="canonical" href={`${SITE_URL}/faq`} />
         <script type="application/ld+json">{serializeSchema(getFAQSchema(displayFaqs))}</script>

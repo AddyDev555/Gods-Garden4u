@@ -54,7 +54,7 @@ const Register = () => {
   return (
     <>
       <Helmet>
-        <title>Create Account | {SITE_NAME}</title>
+        <title>{`Create Account | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

@@ -8,7 +8,7 @@ const Addresses = () => {
   return (
     <>
       <Helmet>
-        <title>My Addresses | {SITE_NAME}</title>
+        <title>{`My Addresses | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

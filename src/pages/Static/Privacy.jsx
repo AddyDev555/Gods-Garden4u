@@ -6,7 +6,7 @@ const Privacy = () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy | {SITE_NAME}</title>
+        <title>{`Privacy Policy | ${SITE_NAME}`}</title>
         <meta name="description" content={`Privacy Policy for ${SITE_NAME}. Learn how we collect, use, and protect your personal information.`} />
         <link rel="canonical" href={`${SITE_URL}/privacy`} />
       </Helmet>

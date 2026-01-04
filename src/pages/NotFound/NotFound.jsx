@@ -9,7 +9,7 @@ const NotFound = () => {
   return (
     <>
       <Helmet>
-        <title>Page Not Found | {SITE_NAME}</title>
+        <title>{`Page Not Found | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

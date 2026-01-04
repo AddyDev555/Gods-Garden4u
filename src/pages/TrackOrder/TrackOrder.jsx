@@ -16,7 +16,7 @@ const TrackOrder = () => {
   return (
     <>
       <Helmet>
-        <title>Track Order | {SITE_NAME}</title>
+        <title>{`Track Order | ${SITE_NAME}`}</title>
         <meta name="description" content={`Track your ${SITE_NAME} order. Enter your order ID to check delivery status.`} />
       </Helmet>
 

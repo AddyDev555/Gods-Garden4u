@@ -8,7 +8,7 @@ const ForgotPassword = () => {
   return (
     <>
       <Helmet>
-        <title>Forgot Password | {SITE_NAME}</title>
+        <title>{`Forgot Password | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

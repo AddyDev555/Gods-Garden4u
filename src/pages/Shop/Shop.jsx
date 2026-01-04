@@ -7,7 +7,7 @@ import { SITE_NAME, SORT_OPTIONS } from '../../utils/constants';
 import { ProductGridSkeleton } from '../../components/common/Skeleton/Skeleton';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import Button from '../../components/common/Button/Button';
-import { getAllProducts, getProductCategories } from '../../api/productApi';
+import { getAllProducts, getProductCategories } from '../../api/gods-garden/productApi';
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -99,7 +99,7 @@ const Shop = () => {
   return (
     <>
       <Helmet>
-        <title>Shop All Products | {SITE_NAME}</title>
+        <title>{`Shop All Products | ${SITE_NAME}`}</title>
         <meta name="description" content="Browse our complete collection of premium organic spices, dry fruits, seeds, and more." />
         <link rel="canonical" href={`${process.env.REACT_APP_SITE_URL}/shop`} />
       </Helmet>

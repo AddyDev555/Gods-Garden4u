@@ -5,7 +5,7 @@ import { useShop } from '../../context/ShopContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useToast } from '../../components/common/Toast/Toast';
 import { SITE_NAME, SIZE_LABELS, RAZORPAY_KEY_ID } from '../../utils/constants';
-import api from '../../api/axiosConfig';
+import api from '../../api/gods-garden/axiosConfig';
 import Button from '../../components/common/Button/Button';
 import Input, { Textarea } from '../../components/common/Input/Input';
 import { cn } from '../../utils/helpers';
@@ -145,7 +145,7 @@ const Checkout = () => {
   return (
     <>
       <Helmet>
-        <title>Checkout | {SITE_NAME}</title>
+        <title>{`Checkout | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

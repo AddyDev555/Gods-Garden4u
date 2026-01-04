@@ -6,7 +6,7 @@ const Shipping = () => {
   return (
     <>
       <Helmet>
-        <title>Shipping Policy | {SITE_NAME}</title>
+        <title>{`Shipping Policy | ${SITE_NAME}`}</title>
         <meta name="description" content={`${SITE_NAME} shipping policy. Learn about delivery times, shipping costs, and international shipping options.`} />
         <link rel="canonical" href={`${SITE_URL}/shipping`} />
       </Helmet>

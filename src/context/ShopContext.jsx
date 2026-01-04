@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import api from '../api/axiosConfig';
+import api from '../api/gods-garden/axiosConfig';
 import { STORAGE_KEYS, CACHE_DURATION } from '../utils/constants';
 import { storage, sessionStore, generateCartId, debounce } from '../utils/helpers';
 

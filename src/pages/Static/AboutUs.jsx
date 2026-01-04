@@ -21,7 +21,7 @@ const AboutUs = () => {
   return (
     <>
       <Helmet>
-        <title>About Us | {SITE_NAME}</title>
+        <title>{`About Us | ${SITE_NAME}`}</title>
         <meta name="description" content={`Learn about ${SITE_NAME} - our story, mission, and commitment to bringing you premium organic products.`} />
         <link rel="canonical" href={`${SITE_URL}/about`} />
         <script type="application/ld+json">{serializeSchema(getOrganizationSchema())}</script>

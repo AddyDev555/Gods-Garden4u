@@ -70,7 +70,7 @@ const Cart = () => {
     return (
       <>
         <Helmet>
-          <title>Your Cart | {SITE_NAME}</title>
+          <title>{`Your Cart | ${SITE_NAME}`}</title>
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
 
@@ -97,7 +97,7 @@ const Cart = () => {
   return (
     <>
       <Helmet>
-        <title>Your Cart ({cartTotals.itemCount} items) | {SITE_NAME}</title>
+        <title>{`Your Cart (${cartTotals.itemCount} items) | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

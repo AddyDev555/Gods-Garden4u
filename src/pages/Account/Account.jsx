@@ -31,7 +31,7 @@ const Account = () => {
   return (
     <>
       <Helmet>
-        <title>My Account | {SITE_NAME}</title>
+        <title>{`My Account | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

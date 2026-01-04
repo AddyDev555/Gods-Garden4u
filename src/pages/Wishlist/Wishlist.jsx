@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet';
 import { FiHeart, FiTrash2 } from 'react-icons/fi';
 import { useWishlist } from '../../context/WishlistContext';
 import { SITE_NAME } from '../../utils/constants';
-import { getProductsByIds } from '../../api/productApi';
+import { getProductsByIds } from '../../api/gods-garden/productApi';
 import Button from '../../components/common/Button/Button';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
@@ -61,7 +61,7 @@ const Wishlist = () => {
   return (
     <>
       <Helmet>
-        <title>Wishlist | {SITE_NAME}</title>
+        <title>{`Wishlist | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

@@ -6,7 +6,7 @@ const Terms = () => {
   return (
     <>
       <Helmet>
-        <title>Terms of Service | {SITE_NAME}</title>
+        <title>{`Terms of Service | ${SITE_NAME}`}</title>
         <meta name="description" content={`Terms of Service for ${SITE_NAME}. Read our terms and conditions for using our website and services.`} />
         <link rel="canonical" href={`${SITE_URL}/terms`} />
       </Helmet>

@@ -6,7 +6,7 @@ const CookiePolicy = () => {
   return (
     <>
       <Helmet>
-        <title>Cookie Policy | {SITE_NAME}</title>
+        <title>{`Cookie Policy | ${SITE_NAME}`}</title>
         <meta name="description" content={`${SITE_NAME} cookie policy. Learn about how we use cookies on our website.`} />
         <link rel="canonical" href={`${SITE_URL}/cookies`} />
       </Helmet>

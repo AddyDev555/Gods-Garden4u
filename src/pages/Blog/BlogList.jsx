@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import api from '../../api/axiosConfig';
+import api from '../../api/gods-garden/axiosConfig';
 import { SITE_NAME, SITE_URL } from '../../utils/constants';
 import { formatDate, createSlug } from '../../utils/helpers';
 import { BlogCardSkeleton } from '../../components/common/Skeleton/Skeleton';
@@ -29,7 +29,7 @@ const BlogList = () => {
   return (
     <>
       <Helmet>
-        <title>Blog | {SITE_NAME}</title>
+        <title>{`Blog | ${SITE_NAME}`}</title>
         <meta name="description" content={`Read our latest articles about organic food, healthy living, and recipes from ${SITE_NAME}.`} />
         <link rel="canonical" href={`${SITE_URL}/blog`} />
       </Helmet>

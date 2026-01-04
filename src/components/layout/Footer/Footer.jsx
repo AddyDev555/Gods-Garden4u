@@ -4,7 +4,7 @@ import { FiFacebook, FiInstagram, FiTwitter, FiYoutube, FiMail, FiPhone, FiMapPi
 import { SITE_NAME, FOOTER_LINKS, SOCIAL_LINKS, CONTACT_INFO } from '../../../utils/constants';
 import CurrencySelector from '../../ui/CurrencySelector';
 import { cn } from '../../../utils/helpers';
-import { subscribeNewsletter } from '../../../api/userApi';
+import { subscribeNewsletter } from '../../../api/gods-garden/userApi';
 
 const Footer = () => {
   const [email, setEmail] = useState('');

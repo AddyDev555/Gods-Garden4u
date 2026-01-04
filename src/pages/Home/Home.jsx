@@ -8,7 +8,7 @@ import { getOrganizationSchema, getWebSiteSchema, serializeSchema } from '../../
 import Button from '../../components/common/Button/Button';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
-import { getTopSellingProducts, getNewArrivalProducts, getProductCategories } from '../../api/productApi';
+import { getTopSellingProducts, getNewArrivalProducts, getProductCategories } from '../../api/gods-garden/productApi';
 
 // Animation variants
 const fadeInUp = {
@@ -90,7 +90,7 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>{SITE_NAME} | Premium Organic Food & Spices</title>
+        <title>{`${SITE_NAME} | Premium Organic Food & Spices`}</title>
         <meta name="description" content={SITE_DESCRIPTION} />
         <meta property="og:title" content={`${SITE_NAME} | Premium Organic Food & Spices`} />
         <meta property="og:description" content={SITE_DESCRIPTION} />

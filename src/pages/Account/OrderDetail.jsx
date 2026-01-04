@@ -9,7 +9,7 @@ const OrderDetail = () => {
   return (
     <>
       <Helmet>
-        <title>Order #{id} | {SITE_NAME}</title>
+        <title>{`Order #${id} | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

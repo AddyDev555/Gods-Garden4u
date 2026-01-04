@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { FiHeart, FiMinus, FiPlus, FiShoppingCart } from 'react-icons/fi';
-import api from '../../api/axiosConfig';
+import api from '../../api/gods-garden/axiosConfig';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useShop } from '../../context/ShopContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -135,7 +135,7 @@ const Product = () => {
   return (
     <>
       <Helmet>
-        <title>{product_name} | {SITE_NAME}</title>
+        <title>{`${product_name} | ${SITE_NAME}`}</title>
         <meta name="description" content={description || product_name} />
         <meta property="og:title" content={product_name} />
         <meta property="og:image" content={main_image} />

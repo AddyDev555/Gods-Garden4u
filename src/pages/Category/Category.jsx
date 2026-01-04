@@ -11,7 +11,7 @@ const Category = () => {
   return (
     <>
       <Helmet>
-        <title>{categoryName} | {SITE_NAME}</title>
+        <title>{`${categoryName} | ${SITE_NAME}`}</title>
         <meta name="description" content={`Shop our collection of ${categoryName.toLowerCase()} products.`} />
       </Helmet>
 

@@ -34,7 +34,7 @@ const Login = () => {
   return (
     <>
       <Helmet>
-        <title>Login | {SITE_NAME}</title>
+        <title>{`Login | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

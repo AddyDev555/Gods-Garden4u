@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import api from '../../api/axiosConfig';
+import api from '../../api/gods-garden/axiosConfig';
 import { SITE_NAME, SITE_URL } from '../../utils/constants';
 import { formatDate } from '../../utils/helpers';
 import { getArticleSchema, getBreadcrumbSchema, serializeSchema } from '../../utils/structuredData';
@@ -63,7 +63,7 @@ const BlogDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{blog.title} | {SITE_NAME}</title>
+        <title>{`${blog.title} | ${SITE_NAME}`}</title>
         <meta name="description" content={blog.description || blog.title} />
         <link rel="canonical" href={`${SITE_URL}/blog/${slug}`} />
         <meta property="og:type" content="article" />

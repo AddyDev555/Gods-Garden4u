@@ -57,7 +57,7 @@ const Navbar = () => {
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+          'fixed top-10 left-0 right-0 z-50 transition-all duration-300',
           isScrolled
             ? 'bg-white/95 backdrop-blur-md shadow-soft'
             : 'bg-white'
@@ -173,8 +173,6 @@ const Navbar = () => {
         </div>
       </header>
 
-      {/* Spacer */}
-      <div className="h-16 lg:h-20" />
 
       {/* Search Overlay */}
       <AnimatePresence>

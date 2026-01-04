@@ -13,7 +13,7 @@ const CheckoutSuccess = () => {
   return (
     <>
       <Helmet>
-        <title>Order Confirmed | {SITE_NAME}</title>
+        <title>{`Order Confirmed | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

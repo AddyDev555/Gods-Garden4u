@@ -6,7 +6,7 @@ const Cancellation = () => {
   return (
     <>
       <Helmet>
-        <title>Cancellation Policy | {SITE_NAME}</title>
+        <title>{`Cancellation Policy | ${SITE_NAME}`}</title>
         <meta name="description" content={`${SITE_NAME} order cancellation policy. Learn how to cancel your order and our cancellation guidelines.`} />
         <link rel="canonical" href={`${SITE_URL}/cancellation`} />
       </Helmet>

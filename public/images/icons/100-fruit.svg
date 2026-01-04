@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <circle cx="24" cy="24" r="22" stroke="#2D5016" stroke-width="2" fill="#f0f7eb"/>
+  <text x="24" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="#2D5016" font-family="sans-serif">100%</text>
+  <text x="24" y="30" text-anchor="middle" font-size="8" fill="#2D5016" font-family="sans-serif">Fruit</text>
+  <circle cx="14" cy="36" r="3" fill="#C41E3A"/>
+  <circle cx="24" cy="38" r="3" fill="#FF8C00"/>
+  <circle cx="34" cy="36" r="3" fill="#FFE135"/>
+  <path d="M14 33c0-1 1-2 2-2" stroke="#228B22" stroke-width="1" stroke-linecap="round"/>
+  <path d="M24 35c0-1 1-2 2-2" stroke="#228B22" stroke-width="1" stroke-linecap="round"/>
+  <path d="M34 33c0-1 1-2 2-2" stroke="#228B22" stroke-width="1" stroke-linecap="round"/>
+</svg>

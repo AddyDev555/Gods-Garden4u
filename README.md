@@ -30,7 +30,7 @@ npm run build
 Create a `.env` file:
 
 ```env
-REACT_APP_API_BASE_URL=https://jaipurmasale-backend.onrender.com/api
+REACT_APP_API_BASE_URL=https://jaipurmasale-backend.onrender.com/api/gods-garden/
 REACT_APP_EXCHANGE_RATE=83
 REACT_APP_RAZORPAY_KEY_ID=your_razorpay_key
 REACT_APP_SITE_URL=https://godsgarden.com

@@ -4,6 +4,7 @@ import { FiFacebook, FiInstagram, FiTwitter, FiYoutube, FiMail, FiPhone, FiMapPi
 import { SITE_NAME, FOOTER_LINKS, SOCIAL_LINKS, CONTACT_INFO } from '../../../utils/constants';
 import CurrencySelector from '../../ui/CurrencySelector';
 import { cn } from '../../../utils/helpers';
+import { subscribeNewsletter } from '../../../api/userApi';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
@@ -15,12 +16,21 @@ const Footer = () => {
     if (!email) return;
 
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
+    setMessage({ type: '', text: '' });
+
+    try {
+      await subscribeNewsletter(email);
       setMessage({ type: 'success', text: 'Thank you for subscribing!' });
       setEmail('');
+    } catch (error) {
+      console.error('Newsletter subscription failed:', error);
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || 'Failed to subscribe. Please try again.',
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   const currentYear = new Date().getFullYear();

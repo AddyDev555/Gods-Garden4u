@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
@@ -6,6 +6,9 @@ import { FiArrowRight, FiShield, FiTruck, FiAward, FiHeart } from 'react-icons/f
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '../../utils/constants';
 import { getOrganizationSchema, getWebSiteSchema, serializeSchema } from '../../utils/structuredData';
 import Button from '../../components/common/Button/Button';
+import ProductCard from '../../components/product/ProductCard/ProductCard';
+import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
+import { getTopSellingProducts, getNewArrivalProducts, getProductCategories } from '../../api/productApi';
 
 // Animation variants
 const fadeInUp = {
@@ -22,6 +25,45 @@ const stagger = {
 };
 
 const Home = () => {
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
+  const [newArrivalProducts, setNewArrivalProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoadingProducts(true);
+      try {
+        const [topSelling, newArrivals] = await Promise.all([
+          getTopSellingProducts(),
+          getNewArrivalProducts(),
+        ]);
+        setTopSellingProducts(topSelling.slice(0, 8));
+        setNewArrivalProducts(newArrivals.slice(0, 8));
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      try {
+        const cats = await getProductCategories();
+        setCategories(cats);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
   const benefits = [
     {
       icon: FiAward,
@@ -61,107 +103,119 @@ const Home = () => {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center bg-gradient-to-br from-primary-50 via-white to-accent-50 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary-200/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-200/30 rounded-full blur-3xl" />
-        </div>
+      <section className="relative min-h-[60vh] md:min-h-[70vh] flex items-end justify-center overflow-hidden">
+        {/* Full-width banner background */}
+        <img
+          src="/images/hero/Banner.png"
+          alt="Explore Our Diverse Categories - God's Garden Products"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
 
-        <div className="container-custom relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Content */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={stagger}
-              className="text-center lg:text-left"
-            >
-              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
-                </span>
-                100% Organic & Natural
-              </motion.div>
+        {/* Gradient overlay for CTA visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-              <motion.h1 variants={fadeInUp} className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
-                Nourish Your Life with{' '}
-                <span className="text-gradient">Nature's Best</span>
-              </motion.h1>
+        {/* CTA Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="relative pb-12 md:pb-16 z-10"
+        >
+          <Button
+            as={Link}
+            to="/shop"
+            size="lg"
+            icon={<FiArrowRight />}
+            iconPosition="right"
+            className="shadow-glow"
+          >
+            View Products
+          </Button>
+        </motion.div>
+      </section>
 
-              <motion.p variants={fadeInUp} className="text-lg text-neutral-600 mb-8 max-w-xl mx-auto lg:mx-0">
-                Discover premium organic spices, dry fruits, and more.
-                Farm-fresh quality delivered to your doorstep.
-              </motion.p>
+      {/* Shop by Category */}
+      <section className="section bg-neutral-50">
+        <div className="container-custom">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-12"
+          >
+            <motion.h2 variants={fadeInUp} className="font-display text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
+              Shop by Category
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto">
+              Explore our wide range of organic products
+            </motion.p>
+          </motion.div>
 
-              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button
-                  as={Link}
-                  to="/shop"
-                  size="lg"
-                  icon={<FiArrowRight />}
-                  iconPosition="right"
-                  className="shadow-glow"
-                >
-                  Shop Now
-                </Button>
-                <Button
-                  as={Link}
-                  to="/about"
-                  variant="outline"
-                  size="lg"
-                >
-                  Our Story
-                </Button>
-              </motion.div>
-
-              {/* Stats */}
-              <motion.div variants={fadeInUp} className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-neutral-200">
-                {[
-                  { value: '50+', label: 'Products' },
-                  { value: '10K+', label: 'Happy Customers' },
-                  { value: '4.9', label: 'Rating' },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <p className="text-2xl sm:text-3xl font-bold text-primary-600">{stat.value}</p>
-                    <p className="text-sm text-neutral-500">{stat.label}</p>
-                  </div>
-                ))}
-              </motion.div>
-            </motion.div>
-
-            {/* Hero Image */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative hidden lg:block"
-            >
-              <div className="relative aspect-square max-w-lg mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full opacity-20 blur-2xl" />
-                <div className="relative bg-gradient-to-br from-primary-100 to-primary-200 rounded-full p-8 flex items-center justify-center">
-                  <span className="text-[200px]">🌿</span>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8"
+          >
+            {isLoadingCategories ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-3">
+                  <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 bg-neutral-200 rounded-full animate-pulse" />
+                  <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse" />
                 </div>
-
-                {/* Floating elements */}
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="absolute top-10 right-0 bg-white rounded-2xl shadow-premium p-4"
-                >
-                  <span className="text-4xl">🌶️</span>
+              ))
+            ) : categories.length > 0 ? (
+              categories.slice(0, 8).map((category) => (
+                <motion.div key={category.id} variants={fadeInUp}>
+                  <Link
+                    to={category.navigate_link || `/shop?category=${category.id}`}
+                    className="flex flex-col items-center gap-3 group"
+                  >
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+                      {category.media ? (
+                        <img
+                          src={category.media}
+                          alt={category.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
+                          <span className="text-4xl sm:text-5xl lg:text-6xl">📦</span>
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-neutral-800 text-center group-hover:text-primary-600 transition-colors">
+                      {category.name}
+                    </h3>
+                  </Link>
                 </motion.div>
-                <motion.div
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                  className="absolute bottom-20 left-0 bg-white rounded-2xl shadow-premium p-4"
-                >
-                  <span className="text-4xl">🥜</span>
+              ))
+            ) : (
+              // Fallback static categories
+              [
+                { name: 'Organic Spices', emoji: '🌶️', slug: 'organic-spices' },
+                { name: 'Dry Fruits', emoji: '🥜', slug: 'dry-fruits' },
+                { name: 'Seeds & Grains', emoji: '🌾', slug: 'seeds-grains' },
+                { name: 'Gift Packs', emoji: '🎁', slug: 'gift-packs' },
+              ].map((category) => (
+                <motion.div key={category.slug} variants={fadeInUp}>
+                  <Link
+                    to={`/category/${category.slug}`}
+                    className="flex flex-col items-center gap-3 group"
+                  >
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
+                      <span className="text-4xl sm:text-5xl lg:text-6xl">{category.emoji}</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-neutral-800 text-center group-hover:text-primary-600 transition-colors">
+                      {category.name}
+                    </h3>
+                  </Link>
                 </motion.div>
-              </div>
-            </motion.div>
-          </div>
+              ))
+            )}
+          </motion.div>
         </div>
       </section>
 
@@ -199,7 +253,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Categories */}
+      {/* Top Selling Products - Commented Out
       <section className="section bg-neutral-50">
         <div className="container-custom">
           <motion.div
@@ -210,41 +264,77 @@ const Home = () => {
             className="text-center mb-12"
           >
             <motion.h2 variants={fadeInUp} className="font-display text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
-              Shop by Category
+              Best Sellers
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto">
-              Explore our wide range of organic products
+              Our most popular products loved by customers
             </motion.p>
           </motion.div>
 
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+            {isLoadingProducts
+              ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+              : topSellingProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+          </div>
+
+          {topSellingProducts.length > 0 && (
+            <div className="text-center mt-10">
+              <Button
+                as={Link}
+                to="/shop?sort=popular"
+                variant="outline"
+                icon={<FiArrowRight />}
+                iconPosition="right"
+              >
+                View All Best Sellers
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+      */}
+
+      {/* New Arrivals */}
+      <section className="section bg-white">
+        <div className="container-custom">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+            className="text-center mb-12"
           >
-            {[
-              { name: 'Organic Spices', emoji: '🌶️', slug: 'organic-spices' },
-              { name: 'Dry Fruits', emoji: '🥜', slug: 'dry-fruits' },
-              { name: 'Seeds & Grains', emoji: '🌾', slug: 'seeds-grains' },
-              { name: 'Gift Packs', emoji: '🎁', slug: 'gift-packs' },
-            ].map((category) => (
-              <motion.div key={category.slug} variants={fadeInUp}>
-                <Link
-                  to={`/category/${category.slug}`}
-                  className="block group relative overflow-hidden rounded-2xl bg-white shadow-soft hover:shadow-medium transition-all"
-                >
-                  <div className="aspect-square flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 group-hover:scale-105 transition-transform duration-500">
-                    <span className="text-6xl sm:text-8xl">{category.emoji}</span>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                    <h3 className="text-white font-semibold text-lg">{category.name}</h3>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+            <motion.h2 variants={fadeInUp} className="font-display text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
+              New Arrivals
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto">
+              Fresh additions to our collection
+            </motion.p>
           </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+            {isLoadingProducts
+              ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+              : newArrivalProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+          </div>
+
+          {newArrivalProducts.length > 0 && (
+            <div className="text-center mt-10">
+              <Button
+                as={Link}
+                to="/shop?filter=new"
+                variant="outline"
+                icon={<FiArrowRight />}
+                iconPosition="right"
+              >
+                View All New Arrivals
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

@@ -25,6 +25,7 @@ const stagger = {
 };
 
 const Home = () => {
+  // eslint-disable-next-line no-unused-vars
   const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
   const [categories, setCategories] = useState([]);

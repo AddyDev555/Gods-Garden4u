@@ -405,6 +405,61 @@
   transition: opacity 200ms ease-in;
 }
 
+/* Blog HTML Content Styles */
+.blog-html-content {
+  line-height: 1.7;
+  color: #333;
+}
+
+.blog-html-content p {
+  margin-bottom: 1rem;
+}
+
+.blog-html-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.blog-html-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.blog-html-content ul {
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.blog-html-content li {
+  margin-bottom: 0.25rem;
+}
+
+.blog-html-content strong {
+  font-weight: 600;
+}
+
+.blog-html-content a {
+  color: #1b7f3a;
+  text-decoration: underline;
+}
+
+.blog-html-content a:hover {
+  color: #0f5f2a;
+}
+
+/* Allow all inline styles to work */
+.blog-html-content * {
+  box-sizing: border-box;
+}
+
+.blog-html-content div {
+  display: block;
+}
+
 /* Print Styles */
 @media print {
   .no-print {

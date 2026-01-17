@@ -6,6 +6,14 @@ import { SITE_NAME, SITE_URL } from '../../utils/constants';
 import { formatDate } from '../../utils/helpers';
 import { getArticleSchema, getBreadcrumbSchema, serializeSchema } from '../../utils/structuredData';
 
+// Decode HTML entities that may have been escaped
+const decodeHtmlEntities = (html) => {
+  if (!html) return '';
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = html;
+  return textarea.value;
+};
+
 const BlogDetail = () => {
   const { slug } = useParams();
   const [blog, setBlog] = useState(null);
@@ -110,12 +118,15 @@ const BlogDetail = () => {
           )}
 
           {/* Content */}
-          <div className="prose prose-neutral max-w-none">
+          <div className="blog-content">
             {blog.description && (
               <p className="text-lg text-neutral-600 mb-6">{blog.description}</p>
             )}
             {blog.content && (
-              <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+              <div
+                className="blog-html-content"
+                dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(blog.content) }}
+              />
             )}
           </div>
         </div>

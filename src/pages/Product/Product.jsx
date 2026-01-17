@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { FiHeart, FiMinus, FiPlus, FiShoppingCart } from 'react-icons/fi';
+import { FiHeart, FiMinus, FiPlus, FiShoppingCart, FiZoomIn } from 'react-icons/fi';
 import api from '../../api/gods-garden/axiosConfig';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useShop } from '../../context/ShopContext';
@@ -15,6 +15,7 @@ import { getProductSchema, getBreadcrumbSchema, serializeSchema } from '../../ut
 import { ProductDetailSkeleton } from '../../components/common/Skeleton/Skeleton';
 import Button from '../../components/common/Button/Button';
 import { BestSellerBadge, NewBadge, OrganicBadge } from '../../components/common/Badge/Badge';
+import ImageLightbox from '../../components/common/ImageLightbox/ImageLightbox';
 
 const Product = () => {
   const { slug } = useParams();
@@ -31,6 +32,7 @@ const Product = () => {
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -83,9 +85,10 @@ const Product = () => {
     product_name,
     description,
     main_image,
-    second_image,
-    third_image,
-    fourth_image,
+    second_media,
+    third_media,
+    fourth_media,
+    fifth_media,
     offer_price,
     mrp,
     pricing,
@@ -103,7 +106,7 @@ const Product = () => {
 
   const discount = calculateDiscount(displayMrp, displayPrice);
   const isWishlisted = isInWishlist(id);
-  const images = [main_image, second_image, third_image, fourth_image].filter(Boolean);
+  const images = [main_image, second_media, third_media, fourth_media, fifth_media].filter(Boolean);
 
   const handleAddToCart = async () => {
     if (stockQuantity < 1) {
@@ -161,30 +164,19 @@ const Product = () => {
           </nav>
 
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-            {/* Image Gallery */}
-            <div className="space-y-4">
-              <motion.div
-                key={activeImage}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="aspect-square rounded-2xl overflow-hidden bg-neutral-100"
-              >
-                <img
-                  src={images[activeImage]}
-                  alt={product_name}
-                  className="w-full h-full object-cover"
-                />
-              </motion.div>
-
+            {/* Image Gallery - Amazon style */}
+            <div className="flex flex-col-reverse md:flex-row gap-4">
+              {/* Thumbnails - vertical on desktop, horizontal on mobile */}
               {images.length > 1 && (
-                <div className="flex gap-2">
+                <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
                   {images.map((img, i) => (
                     <button
                       key={i}
                       onClick={() => setActiveImage(i)}
                       className={cn(
-                        'w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors',
-                        activeImage === i ? 'border-primary-500' : 'border-transparent'
+                        'flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all',
+                        'hover:scale-105 hover:border-primary-300',
+                        activeImage === i ? 'border-primary-500 ring-2 ring-primary-200' : 'border-neutral-200'
                       )}
                     >
                       <img src={img} alt="" className="w-full h-full object-cover" />
@@ -192,6 +184,29 @@ const Product = () => {
                   ))}
                 </div>
               )}
+
+              {/* Main Image - clickable to open lightbox */}
+              <div className="flex-1 relative group">
+                <motion.div
+                  key={activeImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="aspect-square rounded-2xl overflow-hidden bg-neutral-100 cursor-pointer"
+                  onClick={() => setLightboxOpen(true)}
+                >
+                  <img
+                    src={images[activeImage]}
+                    alt={product_name}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  {/* Zoom hint overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 p-3 rounded-full shadow-lg">
+                      <FiZoomIn className="w-6 h-6 text-neutral-700" />
+                    </span>
+                  </div>
+                </motion.div>
+              </div>
             </div>
 
             {/* Product Info */}
@@ -368,6 +383,16 @@ const Product = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        images={images}
+        currentIndex={activeImage}
+        onIndexChange={setActiveImage}
+        alt={product_name}
+      />
     </>
   );
 };

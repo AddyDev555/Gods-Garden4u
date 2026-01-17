@@ -30,9 +30,8 @@ const Checkout = () => {
     comment: '',
   });
 
-  const shippingFee = cartTotals.subtotal >= 499 ? 0 : 39;
   const codFee = paymentMethod === 'cod' ? 39 : 0;
-  const total = cartTotals.subtotal + shippingFee + codFee;
+  const total = cartTotals.subtotal + codFee;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -315,12 +314,6 @@ const Checkout = () => {
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Subtotal</span>
                       <span>{formatPrice(cartTotals.subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">Shipping</span>
-                      <span className={shippingFee === 0 ? 'text-primary-600' : ''}>
-                        {shippingFee === 0 ? 'FREE' : formatPrice(shippingFee)}
-                      </span>
                     </div>
                     {codFee > 0 && (
                       <div className="flex justify-between">

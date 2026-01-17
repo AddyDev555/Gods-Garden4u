@@ -7,7 +7,7 @@ import { useShop } from '../../context/ShopContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useToast } from '../../components/common/Toast/Toast';
 import { SITE_NAME, SIZE_LABELS, DEFAULT_PRODUCT_IMAGE } from '../../utils/constants';
-import { cn, createSlug } from '../../utils/helpers';
+import { createSlug } from '../../utils/helpers';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
 import { CartItemSkeleton } from '../../components/common/Skeleton/Skeleton';
@@ -15,15 +15,14 @@ import { CartItemSkeleton } from '../../components/common/Skeleton/Skeleton';
 const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, cartTotals, isLoading, isUpdating, removeFromCart, updateQuantity, validatePromoCode } = useShop();
-  const { formatPrice, getShippingInfo } = useCurrency();
+  const { formatPrice } = useCurrency();
   const toast = useToast();
 
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
 
-  const shipping = getShippingInfo(cartTotals.subtotal);
-  const total = cartTotals.subtotal + (shipping.isFreeShipping ? 0 : 39) - promoDiscount;
+  const total = cartTotals.subtotal - promoDiscount;
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -234,19 +233,6 @@ const Cart = () => {
                       <span>Promo Discount</span>
                       <span>-{formatPrice(promoDiscount)}</span>
                     </div>
-                  )}
-
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Shipping</span>
-                    <span className={cn('font-medium', shipping.isFreeShipping && 'text-primary-600')}>
-                      {shipping.shippingFeeFormatted}
-                    </span>
-                  </div>
-
-                  {!shipping.isFreeShipping && (
-                    <p className="text-xs text-neutral-500">
-                      Add {shipping.amountForFreeShippingFormatted} more for free shipping
-                    </p>
                   )}
 
                   <hr className="my-4" />

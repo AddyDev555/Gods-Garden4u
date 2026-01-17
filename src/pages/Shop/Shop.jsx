@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiFilter, FiX, FiGrid, FiList } from 'react-icons/fi';
+import { FiFilter, FiX } from 'react-icons/fi';
 import { SITE_NAME, SORT_OPTIONS } from '../../utils/constants';
 import { ProductGridSkeleton } from '../../components/common/Skeleton/Skeleton';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
@@ -109,7 +109,7 @@ const Shop = () => {
         <div className="bg-white border-b border-neutral-200">
           <div className="container-custom py-8">
             <h1 className="font-display text-3xl font-bold text-neutral-900">
-              {selectedCategory ? categories.find(c => c.id == selectedCategory)?.name || 'Products' : 'All Products'}
+              {selectedCategory ? categories.find(c => String(c.id) === selectedCategory)?.name || 'Products' : 'All Products'}
             </h1>
             <p className="text-neutral-600 mt-2">
               Discover our premium collection of organic products
@@ -149,7 +149,7 @@ const Shop = () => {
                         <button
                           onClick={() => handleCategoryChange(category.id)}
                           className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                            selectedCategory == category.id
+                            selectedCategory === String(category.id)
                               ? 'bg-primary-50 text-primary-600 font-medium'
                               : 'text-neutral-600 hover:bg-neutral-50'
                           }`}
@@ -272,7 +272,7 @@ const Shop = () => {
                       <button
                         onClick={() => handleCategoryChange(category.id)}
                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          selectedCategory == category.id
+                          selectedCategory === String(category.id)
                             ? 'bg-primary-50 text-primary-600 font-medium'
                             : 'text-neutral-600 hover:bg-neutral-50'
                         }`}

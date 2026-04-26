@@ -91,9 +91,9 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>{`${SITE_NAME} | Premium Organic Food & Spices`}</title>
+        <title>{`${SITE_NAME} | Organic dehydrated Fruit Chips and Powder`}</title>
         <meta name="description" content={SITE_DESCRIPTION} />
-        <meta property="og:title" content={`${SITE_NAME} | Premium Organic Food & Spices`} />
+        <meta property="og:title" content={`${SITE_NAME} | Organic dehydrated Fruit Chips and Powder`} />
         <meta property="og:description" content={SITE_DESCRIPTION} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE_URL} />
@@ -196,10 +196,10 @@ const Home = () => {
             ) : (
               // Fallback static categories
               [
-                { name: 'Organic Spices', emoji: '🌶️', slug: 'organic-spices' },
-                { name: 'Dry Fruits', emoji: '🥜', slug: 'dry-fruits' },
-                { name: 'Seeds & Grains', emoji: '🌾', slug: 'seeds-grains' },
-                { name: 'Gift Packs', emoji: '🎁', slug: 'gift-packs' },
+                { name: 'Fruit Chips', emoji: '🍎', slug: 'fruit-chips' },
+                { name: 'Fruits', emoji: '🍊', slug: 'fruits' },
+                { name: 'Vegetable Powders', emoji: '🥦', slug: 'vegetable-powders' },
+                { name: 'Natural Snacks', emoji: '🌿', slug: 'natural-snacks' },
               ].map((category) => (
                 <motion.div key={category.slug} variants={fadeInUp}>
                   <Link
@@ -216,40 +216,6 @@ const Home = () => {
                 </motion.div>
               ))
             )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="section bg-white">
-        <div className="container-custom">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-            variants={stagger}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon;
-              return (
-                <motion.div
-                  key={benefit.title}
-                  variants={fadeInUp}
-                  className="flex flex-col items-center text-center p-6 rounded-2xl bg-neutral-50 hover:bg-primary-50 transition-colors"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-semibold text-lg text-neutral-900 mb-2">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-neutral-600 text-sm">
-                    {benefit.description}
-                  </p>
-                </motion.div>
-              );
-            })}
           </motion.div>
         </div>
       </section>
@@ -352,20 +318,62 @@ const Home = () => {
               Ready to Experience Premium Quality?
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-primary-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of happy customers who trust God's Garden for their daily needs.
+              Join thousands of happy customers who trust Gods Garden for their daily needs.
             </motion.p>
             <motion.div variants={fadeInUp}>
-              <Button
-                as={Link}
+              <Link
                 to="/shop"
-                variant="white"
-                size="lg"
-                icon={<FiArrowRight />}
-                iconPosition="right"
+                className="inline-flex items-center gap-2 bg-white text-neutral-900 hover:bg-neutral-50 font-medium px-8 py-3 text-lg rounded-xl shadow-soft hover:shadow-medium transition-all duration-300"
               >
                 Explore Products
-              </Button>
+                <FiArrowRight />
+              </Link>
             </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 100% Organic - Benefits Section */}
+      <section className="section bg-white">
+        <div className="container-custom">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-10"
+          >
+            <motion.h2 variants={fadeInUp} className="font-display text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
+              Why Choose Gods Garden?
+            </motion.h2>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+            variants={stagger}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {benefits.map((benefit) => {
+              const Icon = benefit.icon;
+              return (
+                <motion.div
+                  key={benefit.title}
+                  variants={fadeInUp}
+                  className="flex flex-col items-center text-center p-6 rounded-2xl bg-neutral-50 hover:bg-primary-50 transition-colors"
+                >
+                  <div className="w-14 h-14 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-semibold text-lg text-neutral-900 mb-2">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-neutral-600 text-sm">
+                    {benefit.description}
+                  </p>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>

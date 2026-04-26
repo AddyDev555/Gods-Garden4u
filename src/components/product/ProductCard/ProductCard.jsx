@@ -78,7 +78,7 @@ const ProductCard = ({ product, className }) => {
       )}
     >
       {/* Image Container */}
-      <Link to={productUrl} className="block relative aspect-product overflow-hidden bg-neutral-100">
+      <Link to={productUrl} className="block relative overflow-hidden bg-neutral-100" style={{ aspectRatio: '1/1' }}>
         <img
           src={main_image || DEFAULT_PRODUCT_IMAGE}
           alt={product_name}
@@ -126,7 +126,7 @@ const ProductCard = ({ product, className }) => {
       </Link>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-2 sm:p-4">
         {/* Size tag */}
         {defaultSize && SIZE_LABELS[defaultSize] && (
           <span className="text-xs text-neutral-500 mb-1 block">
@@ -136,19 +136,19 @@ const ProductCard = ({ product, className }) => {
 
         {/* Title */}
         <Link to={productUrl}>
-          <h3 className="font-medium text-neutral-900 line-clamp-2 mb-2 hover:text-primary-600 transition-colors">
+          <h3 className="font-medium text-xs sm:text-sm lg:text-base text-neutral-900 line-clamp-2 mb-1 sm:mb-2 hover:text-primary-600 transition-colors leading-tight">
             {product_name}
           </h3>
         </Link>
 
         {/* Price */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg font-bold text-neutral-900">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
+          <span className="text-sm sm:text-base lg:text-lg font-bold text-neutral-900">
             {formatPrice(displayPrice)}
           </span>
           {discount > 0 && (
             <>
-              <span className="text-sm text-neutral-400 line-through">
+              <span className="text-xs text-neutral-400 line-through hidden sm:inline">
                 {formatPrice(displayMrp)}
               </span>
               <span className="text-xs font-medium text-primary-600">
@@ -181,15 +181,15 @@ const ProductCard = ({ product, className }) => {
           onClick={handleAddToCart}
           disabled={!isInStock || isUpdating}
           className={cn(
-            'w-full py-2.5 rounded-lg font-medium text-sm',
-            'flex items-center justify-center gap-2',
+            'w-full py-2 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm',
+            'flex items-center justify-center gap-1 sm:gap-2',
             'transition-all duration-200',
             isInStock
               ? 'bg-primary-500 text-white hover:bg-primary-600'
               : 'bg-neutral-200 text-neutral-500 cursor-not-allowed'
           )}
         >
-          <FiShoppingCart className="w-4 h-4" />
+          <FiShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
           {isInStock ? 'Add to Cart' : 'Out of Stock'}
         </button>
       </div>

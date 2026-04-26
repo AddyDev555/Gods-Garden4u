@@ -35,11 +35,12 @@ const AboutUs = () => {
               Our Story
             </span>
             <h1 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-6">
-              About God's Garden
+              About Gods Garden
             </h1>
             <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-              We believe in the power of nature. Our mission is to bring you the purest,
-              most authentic organic products directly from farms to your table.
+              Gods Garden offers premium dehydrated fruits, vegetable powders, and natural snacks
+              made without artificial preservatives. We focus on healthy, hygienic, and nutritious
+              products for everyday consumption.
             </p>
           </motion.div>
         </div>
@@ -59,18 +60,18 @@ const AboutUs = () => {
               </h2>
               <div className="space-y-4 text-neutral-600">
                 <p>
-                  God's Garden was born from a simple belief: everyone deserves access to pure,
-                  unadulterated food. We started our journey with a passion for authentic flavors
-                  and a commitment to quality.
+                  Gods Garden was born from a simple belief: everyone deserves access to pure,
+                  natural, and nutritious food. We started our journey in Dombivli, Maharashtra,
+                  with a passion for healthy snacking and wholesome eating.
                 </p>
                 <p>
-                  Today, we work directly with organic farmers across India to source the finest
-                  spices, dry fruits, and superfoods. Every product is carefully selected, tested,
-                  and packaged to preserve its natural goodness.
+                  We specialize in premium dehydrated fruit chips, vegetable powders, and natural
+                  snacks. Every product is carefully crafted without artificial preservatives,
+                  ensuring you get only the best that nature has to offer.
                 </p>
                 <p>
-                  Our promise is simple: no chemicals, no preservatives, just pure nature's bounty
-                  delivered to your doorstep.
+                  Our promise is simple: healthy, hygienic, and nutritious products made with
+                  care and delivered fresh to your doorstep.
                 </p>
               </div>
             </motion.div>

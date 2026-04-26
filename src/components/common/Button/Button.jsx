@@ -34,7 +34,7 @@ const Button = React.forwardRef(({
   animate = true,
   ...props
 }, ref) => {
-  const Component = animate ? motion.button : as;
+  const Component = animate && as === 'button' ? motion.button : as;
 
   const buttonClasses = cn(
     // Base styles
@@ -52,7 +52,7 @@ const Button = React.forwardRef(({
     className
   );
 
-  const motionProps = animate ? {
+  const motionProps = animate && as === 'button' ? {
     whileHover: disabled || loading ? {} : { scale: 1.02 },
     whileTap: disabled || loading ? {} : { scale: 0.98 },
     transition: { duration: 0.2 },

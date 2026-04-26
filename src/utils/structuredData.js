@@ -10,7 +10,7 @@ export const getOrganizationSchema = () => ({
   name: SITE_NAME,
   url: SITE_URL,
   logo: `${SITE_URL}/images/logo.png`,
-  description: 'Premium organic food and spices. Farm fresh, authentic quality.',
+  description: 'Gods Garden - Organic dehydrated Fruit Chips and Powder. Premium dehydrated fruits, vegetable powders, and natural snacks.',
   contactPoint: {
     '@type': 'ContactPoint',
     telephone: CONTACT_INFO.phone,
@@ -20,8 +20,8 @@ export const getOrganizationSchema = () => ({
   },
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Jaipur',
-    addressRegion: 'Rajasthan',
+    addressLocality: 'Dombivli',
+    addressRegion: 'Maharashtra',
     addressCountry: 'IN',
   },
   sameAs: SOCIAL_LINKS.map((link) => link.url),
@@ -231,15 +231,15 @@ export const getLocalBusinessSchema = () => ({
   address: {
     '@type': 'PostalAddress',
     streetAddress: CONTACT_INFO.address,
-    addressLocality: 'Jaipur',
-    addressRegion: 'Rajasthan',
-    postalCode: '302001',
+    addressLocality: 'Dombivli',
+    addressRegion: 'Maharashtra',
+    postalCode: '421201',
     addressCountry: 'IN',
   },
   geo: {
     '@type': 'GeoCoordinates',
-    latitude: 26.9124,
-    longitude: 75.7873,
+    latitude: 19.2183,
+    longitude: 73.0878,
   },
   openingHoursSpecification: [
     {

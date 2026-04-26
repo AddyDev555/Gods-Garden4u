@@ -2,9 +2,9 @@
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://jaipurmasale-backend.onrender.com/api/gods-garden/';
 
 // Site Configuration
-export const SITE_NAME = process.env.REACT_APP_SITE_NAME || "God's Garden";
+export const SITE_NAME = process.env.REACT_APP_SITE_NAME || 'Gods Garden';
 export const SITE_URL = process.env.REACT_APP_SITE_URL || 'https://godsgarden.com';
-export const SITE_DESCRIPTION = 'Premium Organic Food & Spices - Shop authentic organic masalas, dry fruits, seeds and more.';
+export const SITE_DESCRIPTION = 'Gods Garden Organic dehydrated Fruit Chips and Powder - Premium dehydrated fruits, vegetable powders, and natural snacks made without artificial preservatives.';
 
 // Currency Configuration
 export const DEFAULT_CURRENCY = 'INR';
@@ -76,9 +76,9 @@ export const NAV_LINKS = [
 export const FOOTER_LINKS = {
   shop: [
     { label: 'All Products', path: '/shop' },
-    { label: 'Best Sellers', path: '/shop?sort=popular' },
+    { label: 'Fruit Chips', path: '/category/fruit-chips' },
+    { label: 'Fruits', path: '/category/fruits' },
     { label: 'New Arrivals', path: '/shop?filter=new' },
-    { label: 'Gift Packs', path: '/category/gift-packs' },
   ],
   support: [
     { label: 'Contact Us', path: '/contact' },
@@ -102,18 +102,16 @@ export const FOOTER_LINKS = {
 
 // Social Links
 export const SOCIAL_LINKS = [
-  { name: 'Facebook', url: 'https://facebook.com/godsgarden', icon: 'facebook' },
-  { name: 'Instagram', url: 'https://instagram.com/godsgarden', icon: 'instagram' },
-  { name: 'Twitter', url: 'https://twitter.com/godsgarden', icon: 'twitter' },
-  { name: 'YouTube', url: 'https://youtube.com/godsgarden', icon: 'youtube' },
+  { name: 'Instagram', url: 'https://www.instagram.com/godsgarden_4_u', icon: 'instagram' },
+  { name: 'WhatsApp', url: 'https://wa.me/917738489220', icon: 'whatsapp' },
 ];
 
 // Contact Info
 export const CONTACT_INFO = {
   email: 'support@godsgarden.com',
-  phone: '+91 9876543210',
-  whatsapp: '+919876543210',
-  address: 'Jaipur, Rajasthan, India',
+  phone: '+91 7738489220',
+  whatsapp: '+917738489220',
+  address: 'Dombivli, Maharashtra, India',
 };
 
 // Toast Configuration

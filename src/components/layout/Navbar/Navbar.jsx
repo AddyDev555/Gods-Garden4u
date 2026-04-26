@@ -71,7 +71,11 @@ const Navbar = () => {
               className="flex-shrink-0 flex items-center gap-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="text-2xl">🌿</span>
+              <img
+                src="/images/hero/godsgardenlogo.webp"
+                alt="Gods Garden"
+                className="h-10 w-10 object-contain rounded-full"
+              />
               <span className="font-display font-semibold text-xl text-primary-600">
                 {SITE_NAME}
               </span>

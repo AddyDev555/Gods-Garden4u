@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiFacebook, FiInstagram, FiTwitter, FiYoutube, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
+import { FiFacebook, FiInstagram, FiTwitter, FiYoutube, FiMail, FiPhone, FiMapPin, FiMessageCircle } from 'react-icons/fi';
 import { SITE_NAME, FOOTER_LINKS, SOCIAL_LINKS, CONTACT_INFO } from '../../../utils/constants';
 import CurrencySelector from '../../ui/CurrencySelector';
 import { cn } from '../../../utils/helpers';
@@ -40,6 +40,7 @@ const Footer = () => {
     instagram: FiInstagram,
     twitter: FiTwitter,
     youtube: FiYoutube,
+    whatsapp: FiMessageCircle,
   };
 
   return (
@@ -50,14 +51,19 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <span className="text-3xl">🌿</span>
+              <img
+                src="/images/hero/godsgardenlogo.webp"
+                alt="Gods Garden"
+                className="h-10 w-10 object-contain rounded-full"
+              />
               <span className="font-display font-semibold text-2xl text-primary-400">
                 {SITE_NAME}
               </span>
             </Link>
             <p className="text-neutral-400 mb-6 max-w-sm">
-              Premium organic food and spices, sourced directly from farms.
-              Experience the authentic taste of nature with our handpicked selection.
+              Gods Garden offers premium dehydrated fruits, vegetable powders, and natural snacks
+              made without artificial preservatives. We focus on healthy, hygienic, and nutritious
+              products for everyday consumption.
             </p>
 
             {/* Contact Info */}

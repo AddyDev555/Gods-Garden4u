@@ -104,34 +104,83 @@ const Home = () => {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] md:min-h-[70vh] flex items-end justify-center overflow-hidden">
-        {/* Full-width banner background */}
+      <section className="relative min-h-[60vh] md:min-h-[90vh] flex overflow-hidden">
+        {/* Background */}
         <img
-          src="/images/hero/Banner.png"
+          src="/images/hero/Banner2.png"
           alt="Explore Our Diverse Categories - God's Garden Products"
           className="absolute inset-0 w-full h-full object-cover"
         />
 
-        {/* Gradient overlay for CTA visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
 
-        {/* CTA Button */}
+        {/* Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="relative pb-12 md:pb-16 z-10"
+          className="relative z-10 
+               px-4 sm:px-6 md:px-12 lg:px-20 
+               pt-16 
+               pb-10 md:pb-16 
+               max-w-3xl"
         >
-          <Button
-            as={Link}
-            to="/shop"
-            size="lg"
-            icon={<FiArrowRight />}
-            iconPosition="right"
-            className="shadow-glow"
-          >
-            View Products
-          </Button>
+          {/* Heading */}
+          <h1 className="text-green-700 font-sans 
+                   text-2xl sm:text-3xl md:text-5xl 
+                   font-bold leading-tight">
+            PURE. NATURAL. <br /> <span className='text-[#5B3C1C]'>DELICIOUS.</span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="mt-2 text-sm sm:text-base md:text-lg font-semibold text-[#5B3C1C]">
+            Healthy Snacks, Happy You!
+          </p>
+
+          {/* Description */}
+          <p className="mt-2 text-white text-xs sm:text-sm md:text-base 
+                  w-full md:w-[70%]">
+            Gods Garden offers premium dehydrated fruits,
+            vegetable powders, and natural snacks made
+            without artificial preservatives. We focus on
+            healthy, hygienic, and nutritious products for
+            everyday consumption.
+          </p>
+
+          {/* Buttons */}
+          <div className="pt-4 flex flex-col sm:flex-row gap-3">
+            {/* Primary Button */}
+            <Button
+              as={Link}
+              to="/shop"
+              className="flex items-center justify-center gap-3 
+                   px-5 py-3 rounded-full 
+                   bg-green-700 text-white font-medium 
+                   hover:bg-green-800 transition-all duration-200"
+            >
+              Shop Now
+
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-green-700">
+                <FiArrowRight size={16} />
+              </span>
+            </Button>
+
+            {/* Secondary Button */}
+            <Button
+              as={Link}
+              to="/shop"
+              className="flex items-center justify-center 
+                   px-5 py-3 rounded-full 
+                   bg-transparent
+                   border-2 border-white
+                   text-white font-medium 
+                  hover:bg-transparent
+                   transition-all duration-200"
+            >
+              Explore More
+            </Button>
+          </div>
         </motion.div>
       </section>
 
@@ -285,8 +334,8 @@ const Home = () => {
             {isLoadingProducts
               ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
               : newArrivalProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+                <ProductCard key={product.id} product={product} />
+              ))}
           </div>
 
           {newArrivalProducts.length > 0 && (

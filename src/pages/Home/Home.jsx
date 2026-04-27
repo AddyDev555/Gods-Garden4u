@@ -132,6 +132,7 @@ const Home = () => {
                    font-bold leading-tight">
             PURE. NATURAL. <br /> <span className='text-[#5B3C1C]'>DELICIOUS.</span>
           </h1>
+          
 
           {/* Subtitle */}
           <p className="mt-2 text-sm sm:text-base md:text-lg font-semibold text-[#5B3C1C]">

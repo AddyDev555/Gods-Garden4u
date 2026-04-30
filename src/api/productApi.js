@@ -90,11 +90,26 @@ export const getProductCategories = async (useCache = true) => {
  * @returns {Promise<Array>} Array of products
  */
 export const getAllProducts = async (categoryPk = null) => {
-  const url = categoryPk
-    ? `/get-all-products/?category_pk=${categoryPk}`
-    : '/get-all-products/';
+  // Fetch all products
+  const url = '/get-all-products/';
   const response = await api.get(url);
-  return response.data?.data || response.data || [];
+  let products = response.data?.data || response.data || [];
+  
+  console.log('getAllProducts: Total products fetched:', products.length);
+  console.log('getAllProducts: categoryPk filter:', categoryPk);
+  
+  // Apply category filter on frontend if categoryPk is provided
+  if (categoryPk) {
+    console.log('Filtering products by category_id:', categoryPk);
+    const beforeFilter = products.length;
+    products = products.filter(product => {
+      console.log('Checking product:', product.product_name, 'category_id:', product.category_id, 'matches:', product.category_id === categoryPk);
+      return product.category_id === categoryPk;
+    });
+    console.log(`Filtered from ${beforeFilter} to ${products.length} products`);
+  }
+  
+  return products;
 };
 
 /**

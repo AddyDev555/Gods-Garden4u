@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,100 +7,181 @@ import { SITE_NAME, SORT_OPTIONS } from '../../utils/constants';
 import { ProductGridSkeleton } from '../../components/common/Skeleton/Skeleton';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import Button from '../../components/common/Button/Button';
-import { getAllProducts, getProductCategories } from '../../api/gods-garden/productApi';
+import { getAllProducts } from '../../api/gods-garden/productApi';
+
+// Map category_id → display name.
+// Extend this object whenever new categories are added in the backend.
+const CATEGORY_LABEL_MAP = {
+  1: 'Leaf & Indian superfood',
+  2: 'Fruits & Vegetable Powders',
+  3: 'Fruits Chips',
+};
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);   // raw, unfiltered
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Get filter values from URL
-  const selectedCategory = searchParams.get('category');
+  // ─── URL state ────────────────────────────────────────────────────────────
+  const selectedCategory = searchParams.get('category');   // string | null
   const sortBy = searchParams.get('sort') || 'newest';
 
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoadingCategories(true);
-      try {
-        const cats = await getProductCategories();
-        setCategories(cats);
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  // Fetch products
+  // ─── Fetch ALL products once ──────────────────────────────────────────────
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const prods = await getAllProducts(selectedCategory);
-
-        // Sort products
-        let sortedProducts = [...prods];
-        switch (sortBy) {
-          case 'price-low':
-            sortedProducts.sort((a, b) => (a.offer_price || 0) - (b.offer_price || 0));
-            break;
-          case 'price-high':
-            sortedProducts.sort((a, b) => (b.offer_price || 0) - (a.offer_price || 0));
-            break;
-          case 'rating':
-            sortedProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-            break;
-          case 'popular':
-            sortedProducts.sort((a, b) => (b.top_selling ? 1 : 0) - (a.top_selling ? 1 : 0));
-            break;
-          case 'newest':
-          default:
-            sortedProducts.sort((a, b) => (b.new_arrival ? 1 : 0) - (a.new_arrival ? 1 : 0));
-            break;
-        }
-
-        setProducts(sortedProducts);
+        const response = await getAllProducts();
+        const prods = Array.isArray(response) ? response : (response?.data || []);
+        setAllProducts(prods);
       } catch (error) {
         console.error('Failed to fetch products:', error);
+        setAllProducts([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProducts();
-  }, [selectedCategory, sortBy]);
+  }, []);
 
-  // Handle category change
-  const handleCategoryChange = useCallback((categoryId) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (categoryId) {
-      newParams.set('category', categoryId);
-    } else {
-      newParams.delete('category');
+  // ─── Derive unique categories from product data ───────────────────────────
+  const categories = useMemo(() => {
+    const seen = new Set();
+    const result = [];
+
+    allProducts.forEach((product) => {
+      const id = product.category_id;
+      if (id != null && !seen.has(id)) {
+        seen.add(id);
+        result.push({
+          id,
+          name: CATEGORY_LABEL_MAP[id] || `Category ${id}`,
+        });
+      }
+    });
+
+    // Sort by id so the order is stable
+    return result.sort((a, b) => a.id - b.id);
+  }, [allProducts]);
+
+  // ─── Filter + sort products whenever params or data change ───────────────
+  const products = useMemo(() => {
+    let list = [...allProducts];
+
+    // Category filter
+    if (selectedCategory) {
+      const catId = Number(selectedCategory);
+      list = list.filter((p) => p.category_id === catId);
     }
-    setSearchParams(newParams);
-    setShowFilters(false);
-  }, [searchParams, setSearchParams]);
 
-  // Handle sort change
-  const handleSortChange = useCallback((value) => {
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set('sort', value);
-    setSearchParams(newParams);
-  }, [searchParams, setSearchParams]);
+    // Sort
+    switch (sortBy) {
+      case 'price-low':
+        list.sort((a, b) => (a.offer_price ?? a.mrp ?? 0) - (b.offer_price ?? b.mrp ?? 0));
+        break;
+      case 'price-high':
+        list.sort((a, b) => (b.offer_price ?? b.mrp ?? 0) - (a.offer_price ?? a.mrp ?? 0));
+        break;
+      case 'rating':
+        list.sort((a, b) => Number(b.rating ?? 0) - Number(a.rating ?? 0));
+        break;
+      case 'popular':
+        list.sort((a, b) => (b.top_selling ? 1 : 0) - (a.top_selling ? 1 : 0));
+        break;
+      case 'newest':
+      default:
+        list.sort((a, b) => (b.new_arrival ? 1 : 0) - (a.new_arrival ? 1 : 0));
+        break;
+    }
 
+    return list;
+  }, [allProducts, selectedCategory, sortBy]);
+
+  // ─── Handlers ─────────────────────────────────────────────────────────────
+  const handleCategoryChange = useCallback(
+    (categoryId) => {
+      const newParams = new URLSearchParams(searchParams);
+      if (categoryId != null) {
+        newParams.set('category', String(categoryId));
+      } else {
+        newParams.delete('category');
+      }
+      setSearchParams(newParams);
+      setShowFilters(false);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handleSortChange = useCallback(
+    (value) => {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('sort', value);
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  const getCategoryName = () => {
+    if (!selectedCategory) return 'All Products';
+    return CATEGORY_LABEL_MAP[Number(selectedCategory)] || 'Products';
+  };
+
+  // ─── Shared category list (used in both sidebar + mobile drawer) ──────────
+  const CategoryList = () => (
+    <ul className="space-y-2">
+      <li>
+        <button
+          onClick={() => handleCategoryChange(null)}
+          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+            !selectedCategory
+              ? 'bg-primary-50 text-primary-600 font-medium'
+              : 'text-neutral-600 hover:bg-neutral-50'
+          }`}
+        >
+          All Products
+        </button>
+      </li>
+
+      {isLoading ? (
+        [...Array(3)].map((_, i) => (
+          <li key={i}>
+            <div className="h-10 bg-neutral-100 rounded-lg animate-pulse" />
+          </li>
+        ))
+      ) : (
+        categories.map((category) => {
+          const isSelected = selectedCategory === String(category.id);
+          return (
+            <li key={category.id}>
+              <button
+                onClick={() => handleCategoryChange(category.id)}
+                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  isSelected
+                    ? 'bg-primary-50 text-primary-600 font-medium'
+                    : 'text-neutral-600 hover:bg-neutral-50'
+                }`}
+              >
+                {category.name}
+              </button>
+            </li>
+          );
+        })
+      )}
+    </ul>
+  );
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <>
       <Helmet>
-        <title>{`Shop All Products | ${SITE_NAME}`}</title>
-        <meta name="description" content="Browse our complete collection of premium organic spices, dry fruits, seeds, and more." />
+        <title>{`${getCategoryName()} | ${SITE_NAME}`}</title>
+        <meta
+          name="description"
+          content="Browse our complete collection of premium organic spices, dry fruits, seeds, and more."
+        />
         <link rel="canonical" href={`${process.env.REACT_APP_SITE_URL}/shop`} />
       </Helmet>
 
@@ -109,7 +190,7 @@ const Shop = () => {
         <div className="bg-white border-b border-neutral-200">
           <div className="container-custom py-8">
             <h1 className="font-display text-3xl font-bold text-neutral-900">
-              {selectedCategory ? categories.find(c => String(c.id) === selectedCategory)?.name || 'Products' : 'All Products'}
+              {getCategoryName()}
             </h1>
             <p className="text-neutral-600 mt-2">
               Discover our premium collection of organic products
@@ -124,42 +205,7 @@ const Shop = () => {
             <aside className="hidden lg:block w-64 flex-shrink-0">
               <div className="bg-white rounded-xl p-6 shadow-soft sticky top-24">
                 <h3 className="font-semibold text-neutral-900 mb-4">Categories</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <button
-                      onClick={() => handleCategoryChange(null)}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                        !selectedCategory
-                          ? 'bg-primary-50 text-primary-600 font-medium'
-                          : 'text-neutral-600 hover:bg-neutral-50'
-                      }`}
-                    >
-                      All Products
-                    </button>
-                  </li>
-                  {isLoadingCategories ? (
-                    [...Array(4)].map((_, i) => (
-                      <li key={i}>
-                        <div className="h-10 bg-neutral-100 rounded-lg animate-pulse" />
-                      </li>
-                    ))
-                  ) : (
-                    categories.map((category) => (
-                      <li key={category.id}>
-                        <button
-                          onClick={() => handleCategoryChange(category.id)}
-                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                            selectedCategory === String(category.id)
-                              ? 'bg-primary-50 text-primary-600 font-medium'
-                              : 'text-neutral-600 hover:bg-neutral-50'
-                          }`}
-                        >
-                          {category.name}
-                        </button>
-                      </li>
-                    ))
-                  )}
-                </ul>
+                <CategoryList />
               </div>
             </aside>
 
@@ -213,7 +259,9 @@ const Shop = () => {
                 </motion.div>
               ) : (
                 <div className="text-center py-16 bg-white rounded-xl">
-                  <p className="text-lg text-neutral-600 mb-4">No products found</p>
+                  <p className="text-lg text-neutral-600 mb-4">
+                    No products found in this category
+                  </p>
                   <Button onClick={() => handleCategoryChange(null)} variant="outline">
                     View All Products
                   </Button>
@@ -254,34 +302,7 @@ const Shop = () => {
 
               <div className="p-4">
                 <h4 className="font-medium text-neutral-900 mb-3">Categories</h4>
-                <ul className="space-y-2">
-                  <li>
-                    <button
-                      onClick={() => handleCategoryChange(null)}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                        !selectedCategory
-                          ? 'bg-primary-50 text-primary-600 font-medium'
-                          : 'text-neutral-600 hover:bg-neutral-50'
-                      }`}
-                    >
-                      All Products
-                    </button>
-                  </li>
-                  {categories.map((category) => (
-                    <li key={category.id}>
-                      <button
-                        onClick={() => handleCategoryChange(category.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          selectedCategory === String(category.id)
-                            ? 'bg-primary-50 text-primary-600 font-medium'
-                            : 'text-neutral-600 hover:bg-neutral-50'
-                        }`}
-                      >
-                        {category.name}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                <CategoryList />
               </div>
             </motion.div>
           </>

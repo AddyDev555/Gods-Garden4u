@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
-import { FiArrowRight, FiShield, FiTruck, FiAward, FiHeart } from 'react-icons/fi';
+import { FiArrowRight, FiShield, FiTruck, FiAward, FiHeart, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '../../utils/constants';
 import { getOrganizationSchema, getWebSiteSchema, serializeSchema } from '../../utils/structuredData';
 import Button from '../../components/common/Button/Button';
@@ -10,20 +10,283 @@ import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
 import { getTopSellingProducts, getNewArrivalProducts, getProductCategories } from '../../api/gods-garden/productApi';
 
-// Animation variants
+// ─── Hero Slides ──────────────────────────────────────────────────────────────
+// Replace image paths with your actual assets. Each slide has independent copy.
+const HERO_SLIDES = [
+  {
+    id: 1,
+    image: '/images/hero/Banner2.png',
+    alt: "God's Garden – Pure Organic Products",
+    title: 'PURE.\nNATURAL.',
+    titleAccent: 'DELICIOUS.',
+    subtitle: 'Healthy Snacks, Happy You!',
+    description:
+      "Gods Garden offers premium dehydrated fruits, vegetable powders, and natural snacks made without artificial preservatives. We focus on healthy, hygienic, and nutritious products for everyday consumption.",
+  },
+  {
+    id: 2,
+    image: '/images/hero/Banner3.jpg',
+    alt: "God's Garden – Dehydrated Fruit Chips",
+    title: 'CRUNCH.\nSAVOR.',
+    titleAccent: 'ENJOY.',
+    subtitle: 'Guilt-Free Snacking Redefined',
+    description:
+      'Discover our range of crispy dehydrated fruit chips — bursting with natural flavor, zero added sugar, and all the goodness of whole fruits in every bite.',
+  },
+  // {
+  //   id: 3,
+  //   image: '/images/hero/Banner4.png',
+  //   alt: "God's Garden – Vegetable Powders",
+  //   title: 'NOURISH.\nTHRIVE.',
+  //   titleAccent: 'FLOURISH.',
+  //   subtitle: 'Nature Packed Into Every Spoon',
+  //   description:
+  //     'Our cold-processed vegetable and leaf powders retain maximum nutrients so you can boost every meal effortlessly — from smoothies to curries.',
+  // },
+];
+
+// ─── Animation variants ───────────────────────────────────────────────────────
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0 },
 };
 
 const stagger = {
-  visible: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
+const slideVariants = {
+  enter: (direction) => ({
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+  exit: (direction) => ({
+    x: direction > 0 ? '-100%' : '100%',
+    opacity: 0,
+    transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] },
+  }),
+};
+
+const contentVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.12, duration: 0.5, ease: 'easeOut' },
+  }),
+};
+
+// ─── HeroCarousel ─────────────────────────────────────────────────────────────
+const HeroCarousel = () => {
+  const [[activeIndex, direction], setSlide] = useState([0, 0]);
+  const autoplayRef = useRef(null);
+  const AUTOPLAY_MS = 5000;
+
+  const goTo = useCallback((nextIndex, dir) => {
+    setSlide([nextIndex, dir]);
+  }, []);
+
+  const prev = useCallback(() => {
+    const next = (activeIndex - 1 + HERO_SLIDES.length) % HERO_SLIDES.length;
+    goTo(next, -1);
+  }, [activeIndex, goTo]);
+
+  const next = useCallback(() => {
+    const next = (activeIndex + 1) % HERO_SLIDES.length;
+    goTo(next, 1);
+  }, [activeIndex, goTo]);
+
+  // Autoplay
+  useEffect(() => {
+    autoplayRef.current = setInterval(next, AUTOPLAY_MS);
+    return () => clearInterval(autoplayRef.current);
+  }, [next]);
+
+  const pauseAutoplay = () => clearInterval(autoplayRef.current);
+  const resumeAutoplay = () => {
+    clearInterval(autoplayRef.current);
+    autoplayRef.current = setInterval(next, AUTOPLAY_MS);
+  };
+
+  const slide = HERO_SLIDES[activeIndex];
+
+  return (
+    <section
+      className="relative min-h-[60vh] md:min-h-[90vh] flex overflow-hidden"
+      onMouseEnter={pauseAutoplay}
+      onMouseLeave={resumeAutoplay}
+    >
+      {/* ── Slide images ── */}
+      <AnimatePresence initial={false} custom={direction}>
+        <motion.div
+          key={slide.id}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          className="absolute inset-0"
+        >
+          <img
+            src={slide.image}
+            alt={slide.alt}
+            className="w-full h-full object-cover"
+          />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* ── Slide content ── */}
+      <AnimatePresence mode="wait">
+        <div
+          key={`content-${slide.id}`}
+          className="relative z-10
+            px-4 sm:px-6 md:px-12 lg:px-20
+            pt-16
+            pb-10 md:pb-16
+            max-w-3xl
+            flex flex-col justify-center"
+        >
+
+          {/* Title */}
+          <motion.h1
+            custom={1}
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-green-800 font-sans
+              text-2xl sm:text-3xl md:text-4xl
+              font-bold leading-tight whitespace-pre-line"
+          >
+            {slide.title}{' '}
+            <span className="text-[#5B3C1C]">{slide.titleAccent}</span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            custom={2}
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            className="mt-2 text-sm sm:text-base md:text-lg font-semibold text-[#5B3C1C]"
+          >
+            {slide.subtitle}
+          </motion.p>
+
+          {/* Description */}
+          <motion.p
+            custom={3}
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            className="mt-2 text-white text-xs sm:text-sm md:text-base w-full md:w-[70%]"
+          >
+            {slide.description}
+          </motion.p>
+
+          {/* CTA Buttons — unchanged from original */}
+          <motion.div
+            custom={4}
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            className="pt-4 flex flex-col sm:flex-row gap-3"
+          >
+            <Button
+              as={Link}
+              to="/shop"
+              className="flex items-center justify-center gap-3
+                px-5 py-3 rounded-full
+                bg-green-700 text-white font-medium
+                hover:bg-green-800 transition-all duration-200"
+            >
+              Shop Now
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-green-700">
+                <FiArrowRight size={16} />
+              </span>
+            </Button>
+
+            <Button
+              as={Link}
+              to="/shop"
+              className="flex items-center justify-center
+                px-5 py-3 rounded-full
+                bg-transparent
+                border-2 border-white
+                text-white font-medium
+                hover:bg-transparent
+                transition-all duration-200"
+            >
+              Explore More
+            </Button>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+
+      {/* ── Prev / Next arrows ── */}
+      <button
+        onClick={prev}
+        aria-label="Previous slide"
+        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20
+          w-10 h-10 md:w-12 md:h-12 rounded-full
+          bg-white/20 hover:bg-white/40 backdrop-blur-sm
+          border border-white/30
+          flex items-center justify-center
+          text-white transition-all duration-200"
+      >
+        <FiChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+      </button>
+
+      <button
+        onClick={next}
+        aria-label="Next slide"
+        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20
+          w-10 h-10 md:w-12 md:h-12 rounded-full
+          bg-white/20 hover:bg-white/40 backdrop-blur-sm
+          border border-white/30
+          flex items-center justify-center
+          text-white transition-all duration-200"
+      >
+        <FiChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+      </button>
+
+      {/* ── Dot indicators ── */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+        {HERO_SLIDES.map((s, i) => (
+          <button
+            key={s.id}
+            onClick={() => goTo(i, i > activeIndex ? 1 : -1)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`transition-all duration-300 rounded-full
+              ${i === activeIndex
+                ? 'w-7 h-2.5 bg-white'
+                : 'w-2.5 h-2.5 bg-white/45 hover:bg-white/70'
+              }`}
+          />
+        ))}
+      </div>
+
+      {/* ── Progress bar ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/20">
+        <motion.div
+          key={`progress-${activeIndex}`}
+          className="h-full bg-green-500"
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: AUTOPLAY_MS / 1000, ease: 'linear' }}
+        />
+      </div>
+    </section>
+  );
+};
+
+// ─── Home ─────────────────────────────────────────────────────────────────────
 const Home = () => {
   // eslint-disable-next-line no-unused-vars
   const [topSellingProducts, setTopSellingProducts] = useState([]);
@@ -103,89 +366,10 @@ const Home = () => {
         </script>
       </Helmet>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[60vh] md:min-h-[90vh] flex overflow-hidden">
-        {/* Background */}
-        <img
-          src="/images/hero/Banner2.png"
-          alt="Explore Our Diverse Categories - God's Garden Products"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+      {/* ── Hero Carousel ── */}
+      <HeroCarousel />
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
-
-        {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="relative z-10 
-               px-4 sm:px-6 md:px-12 lg:px-20 
-               pt-16 
-               pb-10 md:pb-16 
-               max-w-3xl"
-        >
-          {/* Heading */}
-          <h1 className="text-green-700 font-sans 
-                   text-2xl sm:text-3xl md:text-5xl 
-                   font-bold leading-tight">
-            PURE. NATURAL. <br /> <span className='text-[#5B3C1C]'>DELICIOUS.</span>
-          </h1>
-          
-
-          {/* Subtitle */}
-          <p className="mt-2 text-sm sm:text-base md:text-lg font-semibold text-[#5B3C1C]">
-            Healthy Snacks, Happy You!
-          </p>
-
-          {/* Description */}
-          <p className="mt-2 text-white text-xs sm:text-sm md:text-base 
-                  w-full md:w-[70%]">
-            Gods Garden offers premium dehydrated fruits,
-            vegetable powders, and natural snacks made
-            without artificial preservatives. We focus on
-            healthy, hygienic, and nutritious products for
-            everyday consumption.
-          </p>
-
-          {/* Buttons */}
-          <div className="pt-4 flex flex-col sm:flex-row gap-3">
-            {/* Primary Button */}
-            <Button
-              as={Link}
-              to="/shop"
-              className="flex items-center justify-center gap-3 
-                   px-5 py-3 rounded-full 
-                   bg-green-700 text-white font-medium 
-                   hover:bg-green-800 transition-all duration-200"
-            >
-              Shop Now
-
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-green-700">
-                <FiArrowRight size={16} />
-              </span>
-            </Button>
-
-            {/* Secondary Button */}
-            <Button
-              as={Link}
-              to="/shop"
-              className="flex items-center justify-center 
-                   px-5 py-3 rounded-full 
-                   bg-transparent
-                   border-2 border-white
-                   text-white font-medium 
-                  hover:bg-transparent
-                   transition-all duration-200"
-            >
-              Explore More
-            </Button>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Shop by Category */}
+      {/* ── Shop by Category ── */}
       <section className="section bg-neutral-50">
         <div className="container-custom">
           <motion.div
@@ -226,11 +410,7 @@ const Home = () => {
                   >
                     <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                       {category.media ? (
-                        <img
-                          src={category.media}
-                          alt={category.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={category.media} alt={category.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                           <span className="text-4xl sm:text-5xl lg:text-6xl">📦</span>
@@ -244,7 +424,6 @@ const Home = () => {
                 </motion.div>
               ))
             ) : (
-              // Fallback static categories
               [
                 { name: 'Fruit Chips', emoji: '🍎', slug: 'fruit-chips' },
                 { name: 'Fruits', emoji: '🍊', slug: 'fruits' },
@@ -252,10 +431,7 @@ const Home = () => {
                 { name: 'Natural Snacks', emoji: '🌿', slug: 'natural-snacks' },
               ].map((category) => (
                 <motion.div key={category.slug} variants={fadeInUp}>
-                  <Link
-                    to={`/category/${category.slug}`}
-                    className="flex flex-col items-center gap-3 group"
-                  >
+                  <Link to={`/category/${category.slug}`} className="flex flex-col items-center gap-3 group">
                     <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                       <span className="text-4xl sm:text-5xl lg:text-6xl">{category.emoji}</span>
                     </div>
@@ -270,50 +446,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Top Selling Products - Commented Out
-      <section className="section bg-neutral-50">
-        <div className="container-custom">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="text-center mb-12"
-          >
-            <motion.h2 variants={fadeInUp} className="font-display text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
-              Best Sellers
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto">
-              Our most popular products loved by customers
-            </motion.p>
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-            {isLoadingProducts
-              ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
-              : topSellingProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-          </div>
-
-          {topSellingProducts.length > 0 && (
-            <div className="text-center mt-10">
-              <Button
-                as={Link}
-                to="/shop?sort=popular"
-                variant="outline"
-                icon={<FiArrowRight />}
-                iconPosition="right"
-              >
-                View All Best Sellers
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
-      */}
-
-      {/* New Arrivals */}
+      {/* ── New Arrivals ── */}
       <section className="section bg-white">
         <div className="container-custom">
           <motion.div
@@ -355,7 +488,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* ── CTA Section ── */}
       <section className="section bg-primary-600 text-white">
         <div className="container-custom text-center">
           <motion.div
@@ -383,7 +516,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 100% Organic - Benefits Section */}
+      {/* ── Benefits Section ── */}
       <section className="section bg-white">
         <div className="container-custom">
           <motion.div
@@ -415,12 +548,8 @@ const Home = () => {
                   <div className="w-14 h-14 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4">
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-semibold text-lg text-neutral-900 mb-2">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-neutral-600 text-sm">
-                    {benefit.description}
-                  </p>
+                  <h3 className="font-semibold text-lg text-neutral-900 mb-2">{benefit.title}</h3>
+                  <p className="text-neutral-600 text-sm">{benefit.description}</p>
                 </motion.div>
               );
             })}

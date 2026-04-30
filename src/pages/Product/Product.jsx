@@ -46,6 +46,7 @@ const Product = () => {
         const response = await api.get(`/get-product-detail/?product_pk=${productId}&size=${selectedSize}`);
         const data = response.data?.data || response.data;
         setProduct(data);
+        console.log(data);
 
         // Set default size if available
         if (data?.size?.length > 0 && !data.size.includes(selectedSize)) {

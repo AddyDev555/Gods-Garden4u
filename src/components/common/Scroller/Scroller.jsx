@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 const Scroller = () => {
   const messages = [
@@ -7,23 +7,40 @@ const Scroller = () => {
     "COD Available Across India",
   ];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev === messages.length - 1 ? 0 : prev + 1));
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [messages.length]);
+  const looped = [...messages, ...messages, ...messages];
 
   return (
-    <div className="bg-primary-600 text-white py-2 text-center text-sm font-medium fixed top-0 left-0 right-0 z-[60]">
-      <p
-        key={currentIndex}
-        className="animate-fade-in-out px-4"
-      >
-        {messages[currentIndex]}
-      </p>
+    <div className="fixed top-0 left-0 right-0 z-[60] bg-green-700 overflow-hidden">
+      <div className="py-2.5 text-white text-sm">
+        <div className="overflow-hidden whitespace-nowrap">
+          <div
+            style={{
+              display: 'inline-flex',
+              animation: 'ticker 50s linear infinite',
+              paddingLeft: '100%',
+            }}
+          >
+            {looped.map((msg, i) => (
+              <span
+                key={i}
+                style={{
+                  display: 'inline-block',
+                  paddingRight: '80px',
+                }}
+              >
+                {msg}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes ticker {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-100%); }
+        }
+      `}</style>
     </div>
   );
 };

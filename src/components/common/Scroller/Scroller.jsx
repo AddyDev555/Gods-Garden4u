@@ -14,6 +14,7 @@ const Scroller = () => {
       <div className="py-2.5 text-white text-sm">
         <div className="overflow-hidden whitespace-nowrap">
           <div
+          
             style={{
               display: 'inline-flex',
               animation: 'ticker 50s linear infinite',

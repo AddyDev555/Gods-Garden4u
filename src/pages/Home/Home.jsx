@@ -16,7 +16,7 @@ const HERO_SLIDES = [
     id: 1,
     image: '/images/hero/Banner1.png',
     alt: "God's Garden – Mango King Chips Fresh and Natural",
-    title: 'Real Fruits\n',
+    title: 'Real Mangoes\n',
     titleAccent: 'Real Goodness',
     subtitle: 'Premium Dehydrated Fruit Snacks Made With Care',
     description:

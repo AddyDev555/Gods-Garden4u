@@ -25,7 +25,7 @@ const HERO_SLIDES = [
   },
   {
     id: 2,
-    image: '/images/hero/Banner3.jpg',
+    image: '/images/hero/Banner4.png',
     alt: "God's Garden – Dehydrated Fruit Chips",
     title: 'CRUNCH.\nSAVOR.',
     titleAccent: 'ENJOY.',

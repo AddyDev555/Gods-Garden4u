@@ -11,38 +11,37 @@ import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
 import { getTopSellingProducts, getNewArrivalProducts, getProductCategories } from '../../api/gods-garden/productApi';
 
 // ─── Hero Slides ──────────────────────────────────────────────────────────────
-// Replace image paths with your actual assets. Each slide has independent copy.
 const HERO_SLIDES = [
   {
     id: 1,
+    image: '/images/hero/Banner1.png',
+    alt: "God's Garden – Mango King Chips Fresh and Natural",
+    title: 'Real Fruits\n',
+    titleAccent: 'Real Goodness',
+    subtitle: 'Premium Dehydrated Fruit Snacks Made With Care',
+    description:
+      "Gods Garden offers premium dehydrated fruits, vegetable powders, and natural snacks made without artificial preservatives. We focus on healthy, hygienic, and nutritious products for everyday consumption.",
+  },
+  {
+    id: 2,
     image: '/images/hero/Banner2.png',
     alt: "God's Garden – Pure Organic Products",
-    title: 'PURE.\nNATURAL.',
+    title: 'PURE. NATURAL.\n',
     titleAccent: 'DELICIOUS.',
     subtitle: 'Healthy Snacks, Happy You!',
     description:
       "Gods Garden offers premium dehydrated fruits, vegetable powders, and natural snacks made without artificial preservatives. We focus on healthy, hygienic, and nutritious products for everyday consumption.",
   },
   {
-    id: 2,
-    image: '/images/hero/Banner4.png',
+    id: 3,
+    image: '/images/hero/Banner3.png',
     alt: "God's Garden – Dehydrated Fruit Chips",
-    title: 'CRUNCH.\nSAVOR.',
+    title: 'CRUNCH. SAVOR.\n',
     titleAccent: 'ENJOY.',
     subtitle: 'Guilt-Free Snacking Redefined',
     description:
       'Discover our range of crispy dehydrated fruit chips — bursting with natural flavor, zero added sugar, and all the goodness of whole fruits in every bite.',
   },
-  // {
-  //   id: 3,
-  //   image: '/images/hero/Banner4.png',
-  //   alt: "God's Garden – Vegetable Powders",
-  //   title: 'NOURISH.\nTHRIVE.',
-  //   titleAccent: 'FLOURISH.',
-  //   subtitle: 'Nature Packed Into Every Spoon',
-  //   description:
-  //     'Our cold-processed vegetable and leaf powders retain maximum nutrients so you can boost every meal effortlessly — from smoothies to curries.',
-  // },
 ];
 
 // ─── Animation variants ───────────────────────────────────────────────────────
@@ -137,74 +136,85 @@ const HeroCarousel = () => {
             alt={slide.alt}
             className="w-full h-full object-cover"
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
+          {/*
+            ── FIX: Left-to-right gradient instead of top-to-bottom.
+            This darkens only the left side where the text sits,
+            keeping the right side of the image bright and vivid.
+          ── */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
         </motion.div>
       </AnimatePresence>
 
       {/* ── Slide content ── */}
       <AnimatePresence mode="wait">
+        {/*
+          ── FIX: Added w-full and min-h-[60vh] md:min-h-[90vh] so the content
+          div fills the full section height and justify-center actually works.
+          Removed pt-16 which was pushing content down without centering it.
+        ── */}
         <div
           key={`content-${slide.id}`}
           className="relative z-10
+            w-full min-h-[60vh] md:min-h-[90vh]
             px-4 sm:px-6 md:px-12 lg:px-20
-            pt-16
             pb-10 md:pb-16
             max-w-3xl
             flex flex-col justify-center"
         >
 
-          {/* Title */}
+          {/* Title — FIX: switched to white/light green + drop-shadow so it's legible on any image */}
           <motion.h1
             custom={1}
             variants={contentVariants}
             initial="hidden"
             animate="visible"
-            className="text-green-800 font-sans
-              text-2xl sm:text-3xl md:text-4xl
-              font-bold leading-tight whitespace-pre-line"
+            className="font-serif
+              text-2xl sm:text-3xl md:text-4xl lg:text-5xl
+              font-bold leading-tight whitespace-pre-line
+              text-white drop-shadow-lg"
           >
             {slide.title}{' '}
-            <span className="text-[#5B3C1C]">{slide.titleAccent}</span>
+            {/* FIX: accent color changed from dark brown (#5B3C1C) to light amber so it pops on dark overlay */}
+            <span className="text-amber-300">{slide.titleAccent}</span>
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* Subtitle — FIX: was dark brown (#5B3C1C), now white with slight opacity */}
           <motion.p
             custom={2}
             variants={contentVariants}
             initial="hidden"
             animate="visible"
-            className="mt-2 text-sm sm:text-base md:text-lg font-semibold text-[#5B3C1C]"
+            className="mt-3 text-sm sm:text-base md:text-lg font-semibold text-white/90 drop-shadow"
           >
             {slide.subtitle}
           </motion.p>
 
-          {/* Description */}
+          {/* Description — already white, added drop-shadow for legibility */}
           <motion.p
             custom={3}
             variants={contentVariants}
             initial="hidden"
             animate="visible"
-            className="mt-2 text-white text-xs sm:text-sm md:text-base w-full md:w-[70%]"
+            className="mt-2 text-white/80 text-xs sm:text-sm md:text-base w-full md:w-[70%] drop-shadow"
           >
             {slide.description}
           </motion.p>
 
-          {/* CTA Buttons — unchanged from original */}
+          {/* CTA Buttons */}
           <motion.div
             custom={4}
             variants={contentVariants}
             initial="hidden"
             animate="visible"
-            className="pt-4 flex flex-col sm:flex-row gap-3"
+            className="pt-5 flex flex-col sm:flex-row gap-3"
           >
             <Button
               as={Link}
               to="/shop"
               className="flex items-center justify-center gap-3
                 px-5 py-3 rounded-full
-                bg-green-700 text-white font-medium
-                hover:bg-green-800 transition-all duration-200"
+                bg-green-600 text-white font-medium
+                hover:bg-green-700 transition-all duration-200 shadow-lg"
             >
               Shop Now
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-green-700">
@@ -220,7 +230,7 @@ const HeroCarousel = () => {
                 bg-transparent
                 border-2 border-white
                 text-white font-medium
-                hover:bg-transparent
+                hover:bg-white/10
                 transition-all duration-200"
             >
               Explore More
@@ -361,6 +371,7 @@ const Home = () => {
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE_URL} />
         <link rel="canonical" href={SITE_URL} />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Lato:wght@400;600&display=swap" rel="stylesheet" />
         <script type="application/ld+json">
           {serializeSchema([getOrganizationSchema(), getWebSiteSchema()])}
         </script>

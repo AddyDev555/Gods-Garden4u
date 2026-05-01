@@ -12,7 +12,7 @@ const Scroller = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] bg-green-700 overflow-hidden">
       <div className="py-2.5 text-white text-sm flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <div className='flex items-center gap-2'>
             <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 
@@ -36,8 +36,8 @@ const Scroller = () => {
             </svg>
           <p>Dombivali, Maharashtra, India</p>
           </div>
-        </div>
-        <div className="overflow-hidden whitespace-nowrap w-[70%]">
+        </div> */}
+        <div className="overflow-hidden whitespace-nowrap">
           <div
             style={{
               display: 'inline-flex',

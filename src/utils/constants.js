@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://gods-garden.onrender.com/';
 
 // Site Configuration
 export const SITE_NAME = process.env.REACT_APP_SITE_NAME || 'Gods Garden';

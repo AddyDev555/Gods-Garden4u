@@ -61,10 +61,12 @@ export const AuthProvider = ({ children }) => {
 
       const { token: authToken, ...userData } = response.data;
 
-      // Store auth data
-      setToken(authToken);
+      if (authToken) {
+        setToken(authToken);
+        storage.set(STORAGE_KEYS.AUTH_TOKEN, authToken);
+      }
+
       setUser(userData);
-      storage.set(STORAGE_KEYS.AUTH_TOKEN, authToken);
       storage.set(STORAGE_KEYS.USER, userData);
 
       return { success: true, data: response.data };
@@ -83,7 +85,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await api.post('/signup/', {
+      const response = await api.post('/register-user-promo/', {
         first_name: userData.firstName,
         last_name: userData.lastName,
         email: userData.email,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../../context/AuthContext';
@@ -9,10 +9,16 @@ import Input from '../../components/common/Input/Input';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, isAuthenticated } = useAuth();
   const toast = useToast();
 
   const [mobileNumber, setMobileNumber] = useState('');
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/account');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +31,7 @@ const Login = () => {
     const result = await login(mobileNumber);
     if (result.success) {
       toast.success('Welcome back!');
-      navigate('/');
+      navigate('/account');
     } else {
       toast.error(result.error);
     }

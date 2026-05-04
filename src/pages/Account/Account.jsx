@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { FiPackage, FiMapPin, FiHeart, FiLogOut, FiUser } from 'react-icons/fi';
@@ -11,8 +11,13 @@ const Account = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const toast = useToast();
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   if (!isAuthenticated) {
-    navigate('/login');
     return null;
   }
 
@@ -37,9 +42,6 @@ const Account = () => {
 
       <div className="bg-neutral-50 min-h-screen py-8">
         <div className="container-custom">
-          <h1 className="font-display text-3xl font-bold text-neutral-900 mb-8">
-            My Account
-          </h1>
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Profile Card */}
@@ -55,6 +57,32 @@ const Account = () => {
                     </h2>
                     <p className="text-neutral-500 text-sm">{user?.email}</p>
                   </div>
+                </div>
+
+                <div className="space-y-3 mb-6 text-sm text-neutral-600">
+                  <div className="flex justify-between gap-4">
+                    <span className="font-medium text-neutral-700">Mobile</span>
+                    <span>{user?.mobile_number || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="font-medium text-neutral-700">Status</span>
+                    <span className="text-primary-600">Active</span>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 mb-6">
+                  <Link
+                    to="/account/orders"
+                    className="block text-center px-4 py-3 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
+                  >
+                    Track My Orders
+                  </Link>
+                  <Link
+                    to="/account/addresses"
+                    className="block text-center px-4 py-3 rounded-xl border border-neutral-200 text-neutral-700 hover:border-primary-500 hover:text-primary-600 transition-colors"
+                  >
+                    Manage Addresses
+                  </Link>
                 </div>
 
                 <nav className="space-y-2">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../../context/AuthContext';
@@ -10,8 +10,14 @@ import { Checkbox } from '../../components/common/Input/Input';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register, isLoading } = useAuth();
+  const { register, isLoading, isAuthenticated } = useAuth();
   const toast = useToast();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/account');
+    }
+  }, [isAuthenticated, navigate]);
 
   const [form, setForm] = useState({
     firstName: '',
@@ -45,7 +51,7 @@ const Register = () => {
     const result = await register(form);
     if (result.success) {
       toast.success('Account created successfully!');
-      navigate('/');
+      navigate('/login');
     } else {
       toast.error(result.error);
     }

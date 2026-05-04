@@ -176,7 +176,7 @@ const HeroCarousel = () => {
 
   return (
     <section
-      className="relative min-h-[45vh] max-h-[50vh] sm:min-h-[70vh] md:min-h-[90vh] flex overflow-hidden"
+      className="relative min-h-[55vh] sm:min-h-[70vh] md:min-h-[90vh] flex overflow-hidden"
       onMouseEnter={pauseAutoplay}
       onMouseLeave={resumeAutoplay}
     >
@@ -194,7 +194,7 @@ const HeroCarousel = () => {
           <img
             src={slide.image}
             alt={slide.alt}
-            className="w-full md:h-full md:object-cover md:object-center"
+            className="w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
           {/* Extra bottom gradient on mobile so dots/text are legible */}
@@ -262,7 +262,7 @@ const HeroCarousel = () => {
             variants={contentVariants}
             initial="hidden"
             animate="visible"
-            className="pt-4 md: sm:pt-5 flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
+            className="pt-4 sm:pt-5 flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
           >
             {/* Primary: WhatsApp Order */}
             <WhatsAppButton

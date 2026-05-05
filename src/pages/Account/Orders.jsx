@@ -1,11 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Link } from 'react-router-dom';
-import { FiPackage } from 'react-icons/fi';
-import { SITE_NAME } from '../../utils/constants';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiPackage, FiChevronRight, FiClock } from 'react-icons/fi';
+import { SITE_NAME, SIZE_LABELS } from '../../utils/constants';
 import Button from '../../components/common/Button/Button';
+import { useAuth } from '../../context/AuthContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import api from '../../api/gods-garden/axiosConfig';
 
 const Orders = () => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const { formatPrice } = useCurrency();
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!isAuthenticated) {
+        setIsLoading(false);
+        return;
+      }
+      
+      // Wait for user object to be populated from AuthContext
+      if (!user) return; 
+
+      // Check common variations of the ID field in case the structure differs
+      const userId = user.id || user.user_id || user.pk || user.uid;
+      
+      if (!userId) {
+        console.error('[Orders] User ID not found in user object:', user);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const response = await api.get('/get-all-orders/', {
+          params: { user_id: userId }
+        });
+        setOrders(response.data?.data || []);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchOrders();
+    }
+  }, [user, isAuthenticated]);
+
+  if (!isAuthenticated) return null;
+
   return (
     <>
       <Helmet>
@@ -17,14 +71,89 @@ const Orders = () => {
         <div className="container-custom">
           <h1 className="font-display text-3xl font-bold text-neutral-900 mb-8">My Orders</h1>
 
-          <div className="bg-white rounded-2xl p-8 shadow-soft text-center">
-            <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiPackage className="w-10 h-10 text-neutral-400" />
+          {isLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 shadow-soft animate-pulse flex gap-6">
+                  <div className="w-32 h-32 bg-neutral-200 rounded-xl flex-shrink-0" />
+                  <div className="flex-1 space-y-4 py-2">
+                    <div className="h-5 bg-neutral-200 rounded w-3/4" />
+                    <div className="h-3 bg-neutral-200 rounded w-1/2" />
+                    <div className="h-3 bg-neutral-200 rounded w-1/4" />
+                  </div>
+                </div>
+              ))}
             </div>
-            <h2 className="text-xl font-semibold text-neutral-900 mb-2">No orders yet</h2>
-            <p className="text-neutral-600 mb-6">Start shopping to see your orders here</p>
-            <Button as={Link} to="/shop">Start Shopping</Button>
-          </div>
+          ) : orders.length > 0 ? (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <div key={order.order_id} className="bg-white rounded-2xl shadow-soft overflow-hidden border border-neutral-100 hover:border-primary-200 transition-colors">
+                  <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-6">
+                    {/* Image on the left (showing the primary item) */}
+                    <div className="w-full sm:w-40 h-40 flex-shrink-0 bg-neutral-50 rounded-xl overflow-hidden border border-neutral-100">
+                      <img
+                        src={order.order_details[0]?.image}
+                        alt={order.order_details[0]?.product_name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Details on the right */}
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start gap-4">
+                          <div>
+                            <h3 className="font-bold text-neutral-900 text-xl line-clamp-1">
+                              {order.order_details[0]?.product_name}
+                              {order.order_details.length > 1 && (
+                                <span className="text-sm font-normal text-neutral-500 ml-2">
+                                  + {order.order_details.length - 1} more items
+                                </span>
+                              )}
+                            </h3>
+                            <p className="text-xs font-mono font-medium text-neutral-400 mt-1 uppercase tracking-tight">
+                              Order ID: <span className="text-neutral-600 font-bold">#{order.order_id.slice(0, 8)}</span>
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-neutral-500 mb-0.5">Total Amount</p>
+                            <p className="font-bold text-primary-600 text-xl leading-none">{formatPrice(order.total_amount)}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-neutral-500 text-sm">
+                          <FiClock className="w-4 h-4 text-primary-500" />
+                          <span>Ordered on {new Date(order.created).toLocaleDateString('en-IN', { 
+                            day: 'numeric', 
+                            month: 'long', 
+                            year: 'numeric' 
+                          })}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-neutral-50 flex justify-end">
+                        <Link 
+                          to={`/account/orders/${order.order_id}`}
+                          className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline"
+                        >
+                          View Order Details <FiChevronRight />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl p-8 shadow-soft text-center border border-neutral-100">
+              <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiPackage className="w-10 h-10 text-neutral-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-neutral-900 mb-2">No orders yet</h2>
+              <p className="text-neutral-600 mb-6">Start shopping to see your orders here</p>
+              <Button as={Link} to="/shop">Start Shopping</Button>
+            </div>
+          )}
         </div>
       </div>
     </>

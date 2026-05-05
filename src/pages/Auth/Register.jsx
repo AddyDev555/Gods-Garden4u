@@ -79,12 +79,13 @@ const Register = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
                   label="First Name"
                   name="firstName"
                   value={form.firstName}
                   onChange={handleChange}
+                  autoComplete="given-name"
                   required
                 />
                 <Input
@@ -92,6 +93,7 @@ const Register = () => {
                   name="lastName"
                   value={form.lastName}
                   onChange={handleChange}
+                  autoComplete="family-name"
                   required
                 />
               </div>
@@ -102,12 +104,15 @@ const Register = () => {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
+                autoComplete="email"
                 required
               />
 
               <Input
                 label="Mobile Number"
                 type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 name="mobileNumber"
                 value={form.mobileNumber}
                 onChange={(e) => setForm((prev) => ({
@@ -116,6 +121,7 @@ const Register = () => {
                 }))}
                 placeholder="10-digit mobile number"
                 maxLength={10}
+                autoComplete="tel"
                 required
               />
 

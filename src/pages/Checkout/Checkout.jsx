@@ -12,7 +12,7 @@ import { cn } from '../../utils/helpers';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cartItems, cartTotals, cartId, clearCart } = useShop();
+  const { cartItems, cartId, clearCart } = useShop();
   const { formatPrice, currency, isIndia } = useCurrency();
   const toast = useToast();
 
@@ -30,8 +30,14 @@ const Checkout = () => {
     comment: '',
   });
 
+  const checkoutSubtotal = cartItems.reduce(
+    (sum, item) => sum + (item.total_price ?? (item.offer_price || 0) * (item.quantity || 0)),
+    0
+  );
+
+  const deliveryCharge = checkoutSubtotal < 499 ? 50 : 0;
   const codFee = paymentMethod === 'cod' ? 39 : 0;
-  const total = cartTotals.subtotal + codFee;
+  const total = checkoutSubtotal + deliveryCharge + codFee;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -289,22 +295,28 @@ const Checkout = () => {
 
                   {/* Items */}
                   <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
-                    {cartItems.map((item) => (
-                      <div key={`${item.id}-${item.size}`} className="flex gap-3 text-sm">
-                        <img
-                          src={item.image}
-                          alt=""
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium line-clamp-1">{item.product_name}</p>
-                          <p className="text-neutral-500">
-                            {SIZE_LABELS[item.size]} x {item.quantity}
-                          </p>
+                    {cartItems.map((item) => {
+                      const itemQuantity = item.quantity || 1;
+                      const unitPrice = item.total_price ? item.total_price / itemQuantity : item.offer_price || 0;
+                      const linePrice = item.total_price ?? (unitPrice * itemQuantity);
+
+                      return (
+                        <div key={`${item.id}-${item.size}`} className="flex gap-3 text-sm">
+                          <img
+                            src={item.image}
+                            alt=""
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium line-clamp-1">{item.product_name}</p>
+                            <p className="text-neutral-500">
+                              {SIZE_LABELS[item.size]} x {itemQuantity}
+                            </p>
+                          </div>
+                          <p className="font-medium">{formatPrice(linePrice)}</p>
                         </div>
-                        <p className="font-medium">{formatPrice(item.offer_price * item.quantity)}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   <hr className="my-4" />
@@ -313,7 +325,13 @@ const Checkout = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Subtotal</span>
-                      <span>{formatPrice(cartTotals.subtotal)}</span>
+                      <span>{formatPrice(checkoutSubtotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">Delivery Charges</span>
+                      <span className={deliveryCharge === 0 ? 'text-green-600 font-medium' : ''}>
+                        {deliveryCharge === 0 ? 'FREE' : formatPrice(deliveryCharge)}
+                      </span>
                     </div>
                     {codFee > 0 && (
                       <div className="flex justify-between">

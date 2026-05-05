@@ -62,10 +62,13 @@ const Login = () => {
               <Input
                 label="Mobile Number"
                 type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={mobileNumber}
                 onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 placeholder="Enter 10-digit mobile number"
                 maxLength={10}
+                autoComplete="tel"
                 required
               />
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiPackage, FiChevronRight, FiClock } from 'react-icons/fi';
-import { SITE_NAME, SIZE_LABELS } from '../../utils/constants';
+import { SITE_NAME } from '../../utils/constants';
 import Button from '../../components/common/Button/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';

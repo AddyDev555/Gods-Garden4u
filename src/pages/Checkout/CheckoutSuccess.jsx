@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { FiCheck, FiPackage, FiMail } from 'react-icons/fi';
+import { FiCheck } from 'react-icons/fi';
 import { SITE_NAME } from '../../utils/constants';
 import Button from '../../components/common/Button/Button';
 import api from '../../api/gods-garden/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
-import { formatDate } from '../../utils/helpers';
 
 const CheckoutSuccess = () => {
   const location = useLocation();

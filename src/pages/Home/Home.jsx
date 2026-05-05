@@ -9,7 +9,6 @@ import Button from '../../components/common/Button/Button';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
 import { getTopSellingProducts, getNewArrivalProducts, getProductCategories } from '../../api/gods-garden/productApi';
-import Reviews from '../../components/common/Reviews/Review';
 import IntroPopup from '../../components/common/Splash-Screen/Splash';
 
 // ─── WhatsApp config ──────────────────────────────────────────────────────────

@@ -117,7 +117,7 @@ const Orders = () => {
                           </div>
                           <div className="text-right">
                             <p className="text-sm text-neutral-500 mb-0.5">Total Amount</p>
-                            <p className="font-bold text-primary-600 text-xl leading-none">{formatPrice(order.total_amount)}</p>
+                            <p className="font-bold text-primary-600 text-xl leading-none">{formatPrice(order.paid_amount)}</p>
                           </div>
                         </div>
 

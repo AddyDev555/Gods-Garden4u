@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast/Toast';
@@ -9,16 +9,19 @@ import Input from '../../components/common/Input/Input';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading, isAuthenticated } = useAuth();
   const toast = useToast();
 
   const [mobileNumber, setMobileNumber] = useState('');
 
+  const redirectTo = location.state?.from || '/account';
+
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/account');
+      navigate(redirectTo);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, redirectTo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +34,7 @@ const Login = () => {
     const result = await login(mobileNumber);
     if (result.success) {
       toast.success('Welcome back!');
-      navigate('/account');
+      navigate(redirectTo);
     } else {
       toast.error(result.error);
     }

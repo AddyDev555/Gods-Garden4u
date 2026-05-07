@@ -87,10 +87,10 @@ const OrderDetail = () => {
   const status = order?.payment_status || order?.status || 'Processing';
   const shippingAddress = order?.delivery_address || order?.shipping_address || order?.address || '';
   const contactNumber = order?.mobile_number || order?.phone || order?.contact_number || '';
-  const subtotal = order?.paid_amount || order?.sub_total || order?.subtotal || order?.cart_total || 0;
-  const shippingAmount = order?.shipping_amount || order?.shipping_charge || order?.shipping_cost || 0;
+  const subtotal = order?.total_amount;
+  const shippingAmount = 40;
   const discountAmount = order?.discount_amount || order?.discount || 0;
-  const totalAmount = order?.total_amount || order?.order_total || subtotal + shippingAmount - discountAmount;
+  const totalAmount = order?.paid_amount;
   const createdAt = order?.created || order?.created_at || order?.ordered_at || order?.order_date;
 
   return (
@@ -198,7 +198,7 @@ const OrderDetail = () => {
                 <div className="bg-white rounded-3xl p-6 shadow-soft border border-neutral-100">
                   <h2 className="font-semibold text-lg text-neutral-900 mb-4">Order summary</h2>
                   <div className="space-y-3 text-sm text-neutral-600">
-                    <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+                    <div className="flex justify-between"><span>Price</span><span>{formatPrice(subtotal)}</span></div>
                     <div className="flex justify-between"><span>Shipping</span><span>{formatPrice(shippingAmount)}</span></div>
                     <div className="flex justify-between"><span>Discount</span><span>-{formatPrice(discountAmount)}</span></div>
                     <div className="border-t border-neutral-100 pt-4 flex justify-between items-center font-semibold text-neutral-900"><span>Total</span><span>{formatPrice(totalAmount)}</span></div>

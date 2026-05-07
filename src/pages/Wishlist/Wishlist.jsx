@@ -2,61 +2,136 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { FiHeart, FiTrash2 } from 'react-icons/fi';
-import { useWishlist } from '../../context/WishlistContext';
+import { useAuth } from '../../context/AuthContext';
 import { SITE_NAME } from '../../utils/constants';
-import { getProductsByIds } from '../../api/gods-garden/productApi';
+import { getWishlist, removeWishlistItem } from '../../api/gods-garden/wishlistApi';
 import Button from '../../components/common/Button/Button';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
 
 const Wishlist = () => {
-  const { wishlistItems, wishlistCount, clearWishlist } = useWishlist();
+  const { user, isAuthenticated } = useAuth();
   const [products, setProducts] = useState([]);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Fetch product details when wishlist items change
+  const userId = user?.id || user?.user_id || user?.pk || user?.uid;
+
   useEffect(() => {
-    const fetchWishlistProducts = async () => {
-      if (wishlistItems.length === 0) {
+    const fetchWishlist = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      if (!isAuthenticated || !userId) {
         setProducts([]);
+        setWishlistCount(0);
         setIsLoading(false);
         return;
       }
 
-      setIsLoading(true);
-      setError(null);
-
       try {
-        const fetchedProducts = await getProductsByIds(wishlistItems);
-        // Map API response to expected product format
-        const mappedProducts = fetchedProducts.map((product) => ({
-          id: product.id,
-          product_name: product.name || product.product_name,
-          main_image: product.image || product.main_image,
-          pricing: product.pricing,
-          slug: product.slug,
-          offer_price: product.offer_price || (product.pricing?.M?.[1]),
-          mrp: product.mrp || (product.pricing?.M?.[0]),
-          size: product.size || Object.keys(product.pricing || {}),
-        }));
+        const response = await getWishlist(userId);
+        const items = response.data || [];
+
+        const normalizeProduct = (item) => {
+          const product = item.product ?? item;
+          return {
+            ...product,
+            id: item.product_id ?? product.id,
+            product_name: item.product_name ?? product.product_name ?? product.name,
+            main_image:
+              item.main_image ?? product.main_image ?? product.image ?? product.product_image,
+            offer_price: item.offer_price ?? product.offer_price ?? product.offer_price,
+            mrp: item.mrp ?? product.mrp ?? product.price,
+            size: item.size ?? product.size ?? [],
+            pricing: item.pricing ?? product.pricing ?? {},
+            quantity:
+              item.quantity ??
+              product.quantity ??
+              item.stock_quantity ??
+              product.stock_quantity ??
+              item.available_quantity ??
+              product.available_quantity ??
+              0,
+            slug: item.slug ?? product.slug,
+            wishlist_id: item.wishlist_id ?? item.id,
+          };
+        };
+
+        const mappedProducts = items.map(normalizeProduct);
+
         setProducts(mappedProducts);
+        setWishlistCount(response.total || mappedProducts.length || 0);
       } catch (err) {
-        console.error('Failed to fetch wishlist products:', err);
-        setError('Failed to load wishlist products. Please try again.');
+        console.error('Failed to fetch wishlist:', err);
+        setError('Failed to load your wishlist. Please try again.');
+        setProducts([]);
+        setWishlistCount(0);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchWishlistProducts();
-  }, [wishlistItems]);
+    fetchWishlist();
+  }, [isAuthenticated, userId, refreshKey]);
 
-  const handleClearWishlist = () => {
-    if (window.confirm('Are you sure you want to clear your wishlist?')) {
-      clearWishlist();
+  const refreshWishlist = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  const handleClearWishlist = async () => {
+    if (products.length === 0) {
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to clear your wishlist?')) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await Promise.all(
+        products.map((item) => removeWishlistItem({ wishlist_id: item.wishlist_id }))
+      );
+      setProducts([]);
+      setWishlistCount(0);
+    } catch (err) {
+      console.error('Failed to clear wishlist:', err);
+      setError('Failed to clear wishlist. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const renderEmptyState = () => (
+    <div className="bg-white rounded-2xl p-8 shadow-soft text-center">
+      <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <FiHeart className="w-10 h-10 text-neutral-400" />
+      </div>
+      <h2 className="text-xl font-semibold text-neutral-900 mb-2">
+        {isAuthenticated ? 'Your wishlist is empty' : 'Please login to view your wishlist'}
+      </h2>
+      <p className="text-neutral-600 mb-6">
+        {isAuthenticated
+          ? 'Save items you love for later'
+          : 'Login to see the items you have saved in your wishlist.'}
+      </p>
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <Button as={Link} to={isAuthenticated ? '/shop' : '/login'}>
+          {isAuthenticated ? 'Explore Products' : 'Login'}
+        </Button>
+        {isAuthenticated && (
+          <Button as={Link} to="/shop" variant="outline">
+            Continue Shopping
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -94,19 +169,16 @@ const Wishlist = () => {
               <Button onClick={() => window.location.reload()}>Try Again</Button>
             </div>
           ) : wishlistCount === 0 ? (
-            <div className="bg-white rounded-2xl p-8 shadow-soft text-center">
-              <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiHeart className="w-10 h-10 text-neutral-400" />
-              </div>
-              <h2 className="text-xl font-semibold text-neutral-900 mb-2">Your wishlist is empty</h2>
-              <p className="text-neutral-600 mb-6">Save items you love for later</p>
-              <Button as={Link} to="/shop">Explore Products</Button>
-            </div>
+            renderEmptyState()
           ) : (
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onWishlistChange={refreshWishlist}
+                  />
                 ))}
               </div>
 

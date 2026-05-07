@@ -7,6 +7,7 @@ import api from '../../api/gods-garden/axiosConfig';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useShop } from '../../context/ShopContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast/Toast';
 import { SITE_NAME, SIZE_LABELS } from '../../utils/constants';
 import { parseProductSlug, cn } from '../../utils/helpers';
@@ -25,6 +26,7 @@ const Product = () => {
   const { formatPrice, currency } = useCurrency();
   const { addToCart, isUpdating } = useShop();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const toast = useToast();
 
   const [product, setProduct] = useState(null);
@@ -124,6 +126,12 @@ const Product = () => {
   };
 
   const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      toast.info('Please login to place your order');
+      navigate('/login', { state: { from: '/checkout' } });
+      return;
+    }
+
     const result = await addToCart(id, selectedSize, quantity, displayPrice, displayMrp, true);
     if (result.success) {
       navigate('/checkout');
@@ -330,9 +338,13 @@ const Product = () => {
                   Add to Cart
                 </Button>
                 <button
-                  onClick={() => {
-                    toggleWishlist(id);
-                    toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+                  onClick={async () => {
+                    const result = await toggleWishlist(id);
+                    if (result.success) {
+                      toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+                    } else {
+                      toast.error(result.error || 'Failed to update wishlist');
+                    }
                   }}
                   className={cn(
                     'w-14 h-14 rounded-xl border flex items-center justify-center',

@@ -11,7 +11,7 @@ import { cn, createSlug } from '../../../utils/helpers';
 import { calculateDiscount } from '../../../utils/currency';
 import { DEFAULT_PRODUCT_IMAGE, SIZE_LABELS } from '../../../utils/constants';
 
-const ProductCard = ({ product, className }) => {
+const ProductCard = ({ product, className, hideWishlistButton = false, isWishlisted: isWishlistedOverride, onWishlistChange }) => {
   const { formatPrice } = useCurrency();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToCart, isUpdating } = useShop();
@@ -40,9 +40,18 @@ const ProductCard = ({ product, className }) => {
   const displayPrice = sizePrice[1] || offer_price;
 
   const discount = calculateDiscount(displayMrp, displayPrice);
-  const isWishlisted = isInWishlist(id);
+  const isWishlisted = typeof isWishlistedOverride === 'boolean' ? isWishlistedOverride : isInWishlist(id);
   const productUrl = `/product/${createSlug(product_name)}-${id}`;
-  const isInStock = quantity > 0 || (pricing && Object.values(pricing).some(p => p[2] > 0));
+  const pricingHasStock = pricing && Object.values(pricing).some((p) => {
+    if (Array.isArray(p)) {
+      return Number(p[2] || 0) > 0;
+    }
+    if (p && typeof p === 'object') {
+      return Number(p.quantity || p.stock || p.available || 0) > 0;
+    }
+    return false;
+  });
+  const isInStock = Number(quantity || 0) > 0 || pricingHasStock;
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -61,11 +70,19 @@ const ProductCard = ({ product, className }) => {
     }
   };
 
-  const handleToggleWishlist = (e) => {
+  const handleToggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleWishlist(id);
-    toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+
+    const result = await toggleWishlist(id);
+    if (result.success) {
+      toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+      if (typeof onWishlistChange === 'function') {
+        onWishlistChange();
+      }
+    } else {
+      toast.error(result.error || 'Failed to update wishlist');
+    }
   };
 
   return (
@@ -95,17 +112,19 @@ const ProductCard = ({ product, className }) => {
 
         {/* Quick Actions */}
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={handleToggleWishlist}
-            className={cn(
-              'w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center',
-              'hover:bg-primary-50 transition-colors',
-              isWishlisted && 'text-error-500'
-            )}
-            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            <FiHeart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />
-          </button>
+          {!hideWishlistButton && (
+            <button
+              onClick={handleToggleWishlist}
+              className={cn(
+                'w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center',
+                'hover:bg-primary-50 transition-colors',
+                isWishlisted && 'text-error-500'
+              )}
+              aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <FiHeart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />
+            </button>
+          )}
           <Link
             to={productUrl}
             className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors"

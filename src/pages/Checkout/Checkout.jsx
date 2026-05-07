@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useShop } from '../../context/ShopContext';
+import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useToast } from '../../components/common/Toast/Toast';
 import { SITE_NAME, SIZE_LABELS, RAZORPAY_KEY_ID } from '../../utils/constants';
@@ -13,6 +14,7 @@ import { cn } from '../../utils/helpers';
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, cartId, clearCart } = useShop();
+  const { isAuthenticated } = useAuth();
   const { formatPrice, currency, isIndia } = useCurrency();
   const toast = useToast();
 
@@ -35,7 +37,7 @@ const Checkout = () => {
     0
   );
 
-  const deliveryCharge = checkoutSubtotal < 499 ? 50 : 0;
+  const deliveryCharge = 40;
   const codFee = paymentMethod === 'cod' ? 39 : 0;
   const total = checkoutSubtotal + deliveryCharge + codFee;
 
@@ -58,6 +60,12 @@ const Checkout = () => {
     }
     return true;
   };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/checkout' } });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

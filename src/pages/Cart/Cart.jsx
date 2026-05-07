@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiMinus, FiPlus, FiTrash2, FiShoppingBag, FiTag } from 'react-icons/fi';
 import { useShop } from '../../context/ShopContext';
 import { useCurrency } from '../../context/CurrencyContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast/Toast';
 import { SITE_NAME, SIZE_LABELS, DEFAULT_PRODUCT_IMAGE } from '../../utils/constants';
 import { createSlug } from '../../utils/helpers';
@@ -15,6 +16,7 @@ import { CartItemSkeleton } from '../../components/common/Skeleton/Skeleton';
 const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, cartTotals, isLoading, isUpdating, removeFromCart, updateQuantity, validatePromoCode } = useShop();
+  const { isAuthenticated } = useAuth();
   const { formatPrice } = useCurrency();
   const toast = useToast();
 
@@ -244,7 +246,14 @@ const Cart = () => {
                 </div>
 
                 <Button
-                  onClick={() => navigate('/checkout')}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.info('Please login to proceed to checkout');
+                      navigate('/login', { state: { from: '/checkout' } });
+                      return;
+                    }
+                    navigate('/checkout');
+                  }}
                   fullWidth
                   size="lg"
                   className="mt-6"

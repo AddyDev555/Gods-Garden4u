@@ -89,8 +89,9 @@ const OrderDetail = () => {
   const contactNumber = order?.mobile_number || order?.phone || order?.contact_number || '';
   const subtotal = order?.total_amount;
   const shippingAmount =
-    subtotal > 300 ? 50 :
-    subtotal > 199 ? 40 :
+    subtotal > 300 ? 60 :
+    subtotal > 100 ? 50 :
+    subtotal > 500 ? 0 :
     0;
   const discountAmount = order?.discount_amount || order?.discount || 0;
   const totalAmount = order?.paid_amount;

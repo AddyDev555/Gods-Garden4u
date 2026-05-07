@@ -13,7 +13,7 @@ import { cn } from '../../utils/helpers';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cartItems, cartId, clearCart } = useShop();
+  const { cartItems, cartId, clearCart, cartTotals } = useShop();
   const { isAuthenticated } = useAuth();
   const { formatPrice, currency, isIndia } = useCurrency();
   const toast = useToast();
@@ -32,14 +32,9 @@ const Checkout = () => {
     comment: '',
   });
 
-  const checkoutSubtotal = cartItems.reduce(
-    (sum, item) => sum + (item.total_price ?? (item.offer_price || 0) * (item.quantity || 0)),
-      
-  );
+  const checkoutSubtotal = cartTotals.subtotal;
 
-  const deliveryCharge = checkoutSubtotal > 300 ? 50 :
-    checkoutSubtotal > 199 ? 40 :
-    0;
+  const deliveryCharge = checkoutSubtotal > 100 ? 60 : checkoutSubtotal > 300 ? 50 : checkoutSubtotal > 500 ? 0 : 0;
   const codFee = paymentMethod === 'cod' ? 39 : 0;
   const total = checkoutSubtotal + deliveryCharge + codFee;
 

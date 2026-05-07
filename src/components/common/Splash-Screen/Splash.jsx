@@ -22,7 +22,7 @@ export default function IntroPopup() {
                 <img
                     src="/images/icons/godsgarden.jpeg" // replace with your logo path
                     alt="Logo"
-                    className="mx-auto w-40 h-40 mb-4"
+                    className="mx-auto w-48 h-50 mb-4"
                 />
 
                 {/* Brand Name */}

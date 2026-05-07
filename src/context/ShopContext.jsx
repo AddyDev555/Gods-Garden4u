@@ -245,8 +245,7 @@ export const ShopContextProvider = ({ children }) => {
       if (diff > 0) {
         return addToCart(productId, size, diff, offerPrice, mrp);
       } else if (diff < 0) {
-        // Need to call remove multiple times or update API
-        // For now, remove and re-add with new quantity
+        // Remove completely then add with new quantity (single operation)
         setIsUpdating(true);
         const previousItems = [...cartItems];
 
@@ -257,19 +256,29 @@ export const ShopContextProvider = ({ children }) => {
           )
         );
 
-        // Note: The backend may not support direct quantity update
-        // This is a workaround
         try {
-          // Remove completely then add with new quantity
-          for (let i = 0; i < Math.abs(diff); i++) {
-            await api.post('/remove-cart-items/', {
+          // Remove the item completely
+          await api.post('/remove-cart-items/', {
+            cart_id: cartId,
+            product_pk: productId,
+            size,
+            offer_price: offerPrice,
+            mrp,
+          });
+
+          // If new quantity > 0, add it back
+          if (newQuantity > 0) {
+            await api.post('/cart-items/', {
               cart_id: cartId,
               product_pk: productId,
               size,
+              quantity: newQuantity,
               offer_price: offerPrice,
               mrp,
             });
           }
+
+          // Refresh cart
           await fetchCartItems(cartId, true);
           return { success: true };
         } catch (err) {

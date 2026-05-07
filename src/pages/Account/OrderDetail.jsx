@@ -88,7 +88,10 @@ const OrderDetail = () => {
   const shippingAddress = order?.delivery_address || order?.shipping_address || order?.address || '';
   const contactNumber = order?.mobile_number || order?.phone || order?.contact_number || '';
   const subtotal = order?.total_amount;
-  const shippingAmount = 40;
+  const shippingAmount =
+    subtotal > 300 ? 50 :
+    subtotal > 199 ? 40 :
+    0;
   const discountAmount = order?.discount_amount || order?.discount || 0;
   const totalAmount = order?.paid_amount;
   const createdAt = order?.created || order?.created_at || order?.ordered_at || order?.order_date;

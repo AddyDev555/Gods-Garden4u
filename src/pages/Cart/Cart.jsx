@@ -41,19 +41,27 @@ const Cart = () => {
     }
   };
 
-  const handleRemoveItem = async (item) => {
+  const handleRemoveItem = async (e, item) => {
+    e.preventDefault();
+    e.stopPropagation();
     const result = await removeFromCart(item.id, item.size, item.offer_price, item.mrp);
     if (result.success) {
       toast.success('Item removed from cart');
     }
   };
 
-  const handleUpdateQuantity = async (item, newQuantity) => {
+  const handleUpdateQuantity = async (e, item, newQuantity) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (newQuantity < 1) {
-      handleRemoveItem(item);
+      await handleRemoveItem(e, item);
       return;
     }
-    await updateQuantity(item.id, item.size, newQuantity, item.offer_price, item.mrp);
+
+    const result = await updateQuantity(item.id, item.size, newQuantity, item.offer_price, item.mrp);
+    if (!result.success) {
+      toast.error(result.error || 'Failed to update quantity');
+    }
   };
 
   if (isLoading) {
@@ -149,7 +157,9 @@ const Cart = () => {
                           {/* Quantity Controls */}
                           <div className="flex items-center border border-neutral-200 rounded-lg">
                             <button
-                              onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={(e) => handleUpdateQuantity(e, item, item.quantity - 1)}
                               disabled={isUpdating}
                               className="w-8 h-8 flex items-center justify-center hover:bg-neutral-100"
                             >
@@ -159,7 +169,9 @@ const Cart = () => {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={(e) => handleUpdateQuantity(e, item, item.quantity + 1)}
                               disabled={isUpdating}
                               className="w-8 h-8 flex items-center justify-center hover:bg-neutral-100"
                             >
@@ -173,7 +185,8 @@ const Cart = () => {
                               {formatPrice(item.offer_price * item.quantity)}
                             </span>
                             <button
-                              onClick={() => handleRemoveItem(item)}
+                              type="button"
+                              onClick={(e) => handleRemoveItem(e, item)}
                               disabled={isUpdating}
                               className="p-2 text-neutral-400 hover:text-error-500 transition-colors"
                             >

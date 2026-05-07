@@ -34,10 +34,12 @@ const Checkout = () => {
 
   const checkoutSubtotal = cartItems.reduce(
     (sum, item) => sum + (item.total_price ?? (item.offer_price || 0) * (item.quantity || 0)),
-    0
+      
   );
 
-  const deliveryCharge = 40;
+  const deliveryCharge = checkoutSubtotal > 300 ? 50 :
+    checkoutSubtotal > 199 ? 40 :
+    0;
   const codFee = paymentMethod === 'cod' ? 39 : 0;
   const total = checkoutSubtotal + deliveryCharge + codFee;
 

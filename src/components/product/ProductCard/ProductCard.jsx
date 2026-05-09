@@ -6,7 +6,7 @@ import { useCurrency } from '../../../context/CurrencyContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import { useShop } from '../../../context/ShopContext';
 import { useToast } from '../../../components/common/Toast/Toast';
-import { BestSellerBadge, NewBadge, SaleBadge } from '../../common/Badge/Badge';
+import { BestSellerBadge, NewBadge } from '../../common/Badge/Badge';
 import { cn, createSlug } from '../../../utils/helpers';
 import { calculateDiscount } from '../../../utils/currency';
 import { DEFAULT_PRODUCT_IMAGE, SIZE_LABELS } from '../../../utils/constants';
@@ -174,7 +174,6 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
         <div className="left-3 flex gap-2 mb-2">
           {top_selling && <BestSellerBadge />}
           {new_arrival && <NewBadge />}
-          {/* {discount > 0 && <SaleBadge discount={discount} />} */}
         </div>
 
         {/* Rating */}

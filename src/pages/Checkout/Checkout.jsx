@@ -34,7 +34,14 @@ const Checkout = () => {
 
   const checkoutSubtotal = cartTotals.subtotal;
 
-  const deliveryCharge = checkoutSubtotal > 100 ? 60 : checkoutSubtotal > 300 ? 50 : checkoutSubtotal > 500 ? 0 : 0;
+  const deliveryCharge =
+    checkoutSubtotal >= 499
+      ? 0
+      : checkoutSubtotal >= 300
+        ? 50
+        : checkoutSubtotal >= 100
+          ? 60
+          : 0;
   const codFee = paymentMethod === 'cod' ? 39 : 0;
   const total = checkoutSubtotal + deliveryCharge + codFee;
 

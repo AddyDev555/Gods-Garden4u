@@ -386,7 +386,7 @@ const Home = () => {
   // eslint-disable-next-line no-unused-vars
   const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
-  const [healthyCombos, setNewHealthyCombos] = useState([]);
+  // const [healthyCombos, setNewHealthyCombos] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);

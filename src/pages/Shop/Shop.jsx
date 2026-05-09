@@ -12,10 +12,14 @@ import { getAllProducts } from '../../api/gods-garden/productApi';
 // Map category_id → display name.
 // Extend this object whenever new categories are added in the backend.
 const CATEGORY_LABEL_MAP = {
-  1: 'Leaf & Indian superfood',
+  1: 'Leaf / Superfood',
   2: 'Fruits & Vegetable Powders',
-  3: 'Fruits Chips',
+  3: 'Fruits chips',
+  4: 'Healthy Combo',
 };
+
+// Desired order for categories
+const DESIRED_ORDER = ['Fruits chips', 'Healthy Combo', 'Leaf / Superfood', 'Fruits & Vegetable Powders'];
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -62,8 +66,14 @@ const Shop = () => {
       }
     });
 
-    // Sort by id so the order is stable
-    return result.sort((a, b) => a.id - b.id);
+    // Sort by desired order
+    return result.sort((a, b) => {
+      const indexA = DESIRED_ORDER.indexOf(a.name);
+      const indexB = DESIRED_ORDER.indexOf(b.name);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
   }, [allProducts]);
 
   // ─── Filter + sort products whenever params or data change ───────────────

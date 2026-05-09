@@ -90,7 +90,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'group relative bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300',
+        'w-[86%] h-auto lg:w-[100%] lg:h-[100%] group relative bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300',
         className
       )}
     >
@@ -102,13 +102,6 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {top_selling && <BestSellerBadge />}
-          {new_arrival && <NewBadge />}
-          {discount > 0 && <SaleBadge discount={discount} />}
-        </div>
 
         {/* Quick Actions */}
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -175,6 +168,13 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
               </span>
             </>
           )}
+        </div>
+
+        {/* Badges */}
+        <div className="left-3 flex gap-2 mb-2">
+          {top_selling && <BestSellerBadge />}
+          {new_arrival && <NewBadge />}
+          {/* {discount > 0 && <SaleBadge discount={discount} />} */}
         </div>
 
         {/* Rating */}

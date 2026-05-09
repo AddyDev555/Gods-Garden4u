@@ -140,6 +140,41 @@ const contentVariants = {
   }),
 };
 
+const HOMEPAGE_CATEGORY_ORDER = [
+  'fruits chips',
+  'healthy combo',
+  'leaf / superfood',
+  'fruits & vegetable powders',
+];
+
+const CATEGORY_NAME_ALIAS = {
+  'fruit chips': 'fruits chips',
+  'leaf & indian superfood': 'leaf / superfood',
+  'leaf & superfood': 'leaf / superfood',
+  'fruit & vegetable powders': 'fruits & vegetable powders',
+  'fruits and vegetable powders': 'fruits & vegetable powders',
+};
+
+const normalizeCategoryName = (name) => {
+  if (!name) return '';
+  const normalized = name.toString().trim().toLowerCase().replace(/\s+/g, ' ').replace(/ and /g, ' & ');
+  return CATEGORY_NAME_ALIAS[normalized] || normalized;
+};
+
+const getCategoryOrderIndex = (name) => {
+  const normalized = normalizeCategoryName(name);
+  const index = HOMEPAGE_CATEGORY_ORDER.indexOf(normalized);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+};
+
+const sortCategoriesByHomepageOrder = (categories) =>
+  [...categories].sort((a, b) => {
+    const indexA = getCategoryOrderIndex(a.name);
+    const indexB = getCategoryOrderIndex(b.name);
+    if (indexA !== indexB) return indexA - indexB;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
 // ─── HeroCarousel ─────────────────────────────────────────────────────────────
 const HeroCarousel = () => {
   const [[activeIndex, direction], setSlide] = useState([0, 0]);
@@ -351,6 +386,7 @@ const Home = () => {
   // eslint-disable-next-line no-unused-vars
   const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
+  const [healthyCombos, setNewHealthyCombos] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -376,7 +412,7 @@ const Home = () => {
       setIsLoadingCategories(true);
       try {
         const cats = await getProductCategories();
-        setCategories(cats);
+        setCategories(sortCategoriesByHomepageOrder(cats));
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       } finally {
@@ -487,10 +523,10 @@ const Home = () => {
               ))
             ) : (
               [
-                { name: 'Fruit Chips', emoji: '🍎', slug: 'fruit-chips' },
-                { name: 'Fruits', emoji: '🍊', slug: 'fruits' },
-                { name: 'Vegetable Powders', emoji: '🥦', slug: 'vegetable-powders' },
-                { name: 'Natural Snacks', emoji: '🌿', slug: 'natural-snacks' },
+                { name: 'Fruits chips', emoji: '🍎', slug: 'fruits-chips' },
+                { name: 'Healthy Combo', emoji: '🥗', slug: 'healthy-combo' },
+                { name: 'Leaf / Superfood', emoji: '🌿', slug: 'leaf-superfood' },
+                { name: 'Fruits & Vegetable Powders', emoji: '🥦', slug: 'fruits-vegetable-powders' },
               ].map((category) => (
                 <motion.div key={category.slug} variants={fadeInUp}>
                   <Link to={`/category/${category.slug}`} className="flex flex-col items-center gap-2 sm:gap-3 group">
@@ -507,6 +543,7 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
 
       {/* ── New Arrivals ── */}
       <section className="py-10 sm:py-14 md:py-16 bg-white">

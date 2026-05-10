@@ -242,22 +242,33 @@ export const ShopContextProvider = ({ children }) => {
       if (!item) return { success: false, error: 'Item not found' };
 
       const diff = newQuantity - item.quantity;
-      if (diff > 0) {
-        return addToCart(productId, size, diff, offerPrice, mrp);
-      } else if (diff < 0) {
-        // Remove completely then add with new quantity (single operation)
-        setIsUpdating(true);
-        const previousItems = [...cartItems];
+      if (diff === 0) {
+        return { success: true }; // No change needed
+      }
 
-        // Optimistic update
-        setCartItems((prev) =>
-          prev.map((i) =>
-            i.id === productId && i.size === size ? { ...i, quantity: newQuantity } : i
-          )
-        );
+      setIsUpdating(true);
+      const previousItems = [...cartItems];
 
-        try {
-          // Remove the item completely
+      // Optimistic update
+      setCartItems((prev) =>
+        prev.map((i) =>
+          i.id === productId && i.size === size ? { ...i, quantity: newQuantity } : i
+        )
+      );
+
+      try {
+        if (diff > 0) {
+          // Increase quantity - add the difference
+          await api.post('/cart-items/', {
+            cart_id: cartId,
+            product_pk: productId,
+            size,
+            quantity: diff,
+            offer_price: offerPrice,
+            mrp,
+          });
+        } else {
+          // Decrease quantity - remove completely then add back with new quantity
           await api.post('/remove-cart-items/', {
             cart_id: cartId,
             product_pk: productId,
@@ -266,7 +277,6 @@ export const ShopContextProvider = ({ children }) => {
             mrp,
           });
 
-          // If new quantity > 0, add it back
           if (newQuantity > 0) {
             await api.post('/cart-items/', {
               cart_id: cartId,
@@ -277,21 +287,27 @@ export const ShopContextProvider = ({ children }) => {
               mrp,
             });
           }
-
-          // Refresh cart
-          await fetchCartItems(cartId, true);
-          return { success: true };
-        } catch (err) {
-          setCartItems(previousItems);
-          return { success: false, error: 'Failed to update quantity' };
-        } finally {
-          setIsUpdating(false);
         }
-      }
 
-      return { success: true };
+        // Update cache with new data
+        const updatedItems = cartItems.map((i) =>
+          i.id === productId && i.size === size ? { ...i, quantity: newQuantity } : i
+        );
+        sessionStore.set(`cache_cart_${cartId}`, {
+          data: updatedItems,
+          timestamp: Date.now(),
+        });
+
+        return { success: true };
+      } catch (err) {
+        // Rollback optimistic update
+        setCartItems(previousItems);
+        return { success: false, error: 'Failed to update quantity' };
+      } finally {
+        setIsUpdating(false);
+      }
     },
-    [cartId, cartItems, addToCart, removeFromCart, fetchCartItems]
+    [cartId, cartItems]
   );
 
   // Clear cart

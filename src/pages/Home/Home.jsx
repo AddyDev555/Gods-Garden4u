@@ -74,33 +74,21 @@ const WhatsAppFAB = () => (
 const HERO_SLIDES = [
   {
     id: 1,
-    image: '/images/hero/Banner1.png',
+    desktopImage: '/images/hero/banner_1_desktop.jpg',
+    mobileImage: '/images/hero/banner_1_mobile.png',
     alt: "God's Garden – Mango King Chips Fresh and Natural",
-    title: 'Real Mangoes\n',
-    titleAccent: 'Real Goodness',
-    subtitle: 'Premium Dehydrated Fruit Snacks Made With Care',
-    description:
-      "Gods Garden offers premium dehydrated fruits, vegetable powders, and natural snacks made without artificial preservatives. We focus on healthy, hygienic, and nutritious products for everyday consumption.",
   },
   {
     id: 2,
-    image: '/images/hero/Banner2.png',
+    desktopImage: '/images/hero/banner_2_desktop.jpg',
+    mobileImage: '/images/hero/banner_2_mobile.png',
     alt: "God's Garden – Pure Organic Products",
-    title: 'Pure. Natural.\n',
-    titleAccent: 'Delicious.',
-    subtitle: 'Healthy Snacks, Happy You!',
-    description:
-      "Gods Garden offers premium dehydrated fruits, vegetable powders, and natural snacks made without artificial preservatives. We focus on healthy, hygienic, and nutritious products for everyday consumption.",
   },
   {
     id: 3,
-    image: '/images/hero/Banner3.png',
+    desktopImage: '/images/hero/banner_3_desktop.jpg',
+    mobileImage: '/images/hero/banner_3_mobile.png',
     alt: "God's Garden – Dehydrated Fruit Chips",
-    title: 'Crunch. Savor.\n',
-    titleAccent: 'Enjoy.',
-    subtitle: 'Guilt-Free Snacking Redefined',
-    description:
-      'Discover our range of crispy dehydrated fruit chips — bursting with natural flavor, zero added sugar, and all the goodness of whole fruits in every bite.',
   },
 ];
 
@@ -210,7 +198,7 @@ const HeroCarousel = () => {
 
   return (
     <section
-      className="relative min-h-[55vh] sm:min-h-[70vh] md:min-h-[90vh] flex overflow-hidden"
+      className="relative h-[60vh] sm:min-h-[60vh] md:min-h-[80vh] flex overflow-hidden"
       onMouseEnter={pauseAutoplay}
       onMouseLeave={resumeAutoplay}
     >
@@ -225,78 +213,28 @@ const HeroCarousel = () => {
           exit="exit"
           className="absolute inset-0"
         >
-          <img
-            src={slide.image}
-            alt={slide.alt}
-            className="w-full h-full object-cover object-center"
-          />
+          <picture className="w-full h-auto">
+            <source media="(min-width: 768px)" srcSet={slide.desktopImage} />
+            <img
+              src={slide.mobileImage}
+              alt={slide.alt}
+              className="w-full h-auto object-cover object-center"
+            />
+          </picture>
           <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
           {/* Extra bottom gradient on mobile so dots/text are legible */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
         </motion.div>
       </AnimatePresence>
-
-      {/* ── Slide content ── */}
-      <AnimatePresence mode="wait">
-        <div
-          key={`content-${slide.id}`}
-          className="relative z-10
-            w-full min-h-[55vh] sm:min-h-[70vh] md:min-h-[90vh]
-            px-5 sm:px-8 md:px-12 lg:px-20
-            pb-16 md:pb-20
-            max-w-3xl
-            flex flex-col justify-end md:justify-center"
-        >
-          <motion.h1
-            custom={1}
-            variants={contentVariants}
-            initial="hidden"
-            animate="visible"
-            className="font-display
-              text-4xl sm:text-4xl md:text-5xl lg:text-6xl
-              font-bold leading-tight whitespace-pre-line
-              text-white drop-shadow-lg"
-          >
-            {slide.title}{' '}
-            <span className="text-amber-300">{slide.titleAccent}</span>
-          </motion.h1>
-
-          <motion.p
-            custom={2}
-            variants={contentVariants}
-            initial="hidden"
-            animate="visible"
-            className="mt-2 text-sm sm:text-base md:text-lg font-semibold text-white/90 drop-shadow"
-          >
-            {slide.subtitle}
-          </motion.p>
-
-          <motion.p
-            custom={3}
-            variants={contentVariants}
-            initial="hidden"
-            animate="visible"
-            className="mt-2 text-white/80 text-xs sm:text-sm md:text-base w-full md:w-[70%] drop-shadow hidden sm:block"
-          >
-            {slide.description}
-          </motion.p>
-
-          {/* <motion.div 
-            custom={3}
-            variants={contentVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <Reviews />
-          </motion.div> */}
-
+      <AnimatePresence className="z-10">
+        <div className="absolute left-0 right-0 bottom-10 flex items-center justify-center">
           {/* CTA Buttons */}
           <motion.div
             custom={4}
             variants={contentVariants}
             initial="hidden"
             animate="visible"
-            className="pt-4 sm:pt-5 flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
+            className="flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
           >
             {/* Primary: WhatsApp Order */}
             <WhatsAppButton
@@ -311,11 +249,9 @@ const HeroCarousel = () => {
               to="/shop"
               className="flex items-center justify-center
                 px-5 py-3 rounded-full
-                bg-transparent
-                border-2 border-white
-                text-white font-medium text-sm sm:text-base
-                hover:bg-white/10
-                transition-all duration-200"
+                border-2 bg-white
+                text-black font-medium text-sm sm:text-base
+              transition-all duration-200"
             >
               Shop Now
               <FiArrowRight className="ml-2 w-4 h-4" />
@@ -506,7 +442,7 @@ const Home = () => {
                     to={category.navigate_link || `/shop?category=${category.id}`}
                     className="flex flex-col items-center gap-2 sm:gap-3 group"
                   >
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+                    <div className="w-36 h-36 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                       {category.media ? (
                         <img src={category.media} alt={category.name} className="w-full h-full object-cover" />
                       ) : (

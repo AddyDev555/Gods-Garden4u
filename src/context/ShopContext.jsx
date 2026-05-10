@@ -307,7 +307,7 @@ export const ShopContextProvider = ({ children }) => {
         setIsUpdating(false);
       }
     },
-    [cartId, cartItems]
+    [cartId, cartItems, removeFromCart]
   );
 
   // Clear cart

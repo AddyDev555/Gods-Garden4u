@@ -8,7 +8,7 @@ import { getOrganizationSchema, getWebSiteSchema, serializeSchema } from '../../
 import Button from '../../components/common/Button/Button';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
-import { getTopSellingProducts, getNewArrivalProducts, getProductCategories } from '../../api/gods-garden/productApi';
+import { getTopSellingProducts, getNewArrivalProducts, getProductCategories, getAllProducts } from '../../api/gods-garden/productApi';
 import IntroPopup from '../../components/common/Splash-Screen/Splash';
 
 // ─── WhatsApp config ──────────────────────────────────────────────────────────
@@ -322,7 +322,7 @@ const Home = () => {
   // eslint-disable-next-line no-unused-vars
   const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
-  // const [healthyCombos, setNewHealthyCombos] = useState([]);
+  const [healthyComboProducts, setHealthyComboProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -348,7 +348,17 @@ const Home = () => {
       setIsLoadingCategories(true);
       try {
         const cats = await getProductCategories();
-        setCategories(sortCategoriesByHomepageOrder(cats));
+        const sortedCats = sortCategoriesByHomepageOrder(cats);
+        setCategories(sortedCats);
+
+        // Find Healthy Combo category and fetch its products
+        const healthyComboCategory = sortedCats.find(cat =>
+          normalizeCategoryName(cat.name) === 'healthy combo'
+        );
+        if (healthyComboCategory) {
+          const healthyProducts = await getAllProducts(healthyComboCategory.id);
+          setHealthyComboProducts(healthyProducts.slice(0, 8)); // Limit to 8 products
+        }
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       } finally {
@@ -480,6 +490,59 @@ const Home = () => {
         </div>
       </section>
 
+
+
+
+      {/* ── Healthy Combos ── */}
+      <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
+        <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-8 sm:mb-12"
+          >
+            <motion.h2 variants={fadeInUp} className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
+              Healthy Combos
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto text-sm sm:text-base">
+              Perfect combinations for your healthy lifestyle
+            </motion.p>
+          </motion.div>
+
+          {healthyComboProducts.length > 0 ? (
+            <>
+              {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                {isLoadingCategories
+                  ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+                  : healthyComboProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+              </div>
+
+              <div className="text-center mt-8 sm:mt-10">
+                <Button
+                  as={Link}
+                  to="/shop?category=healthy-combo"
+                  variant="outline"
+                  icon={<FiArrowRight />}
+                  iconPosition="right"
+                >
+                  View All Healthy Combos
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🥗</div>
+              <h3 className="text-xl font-semibold text-neutral-700 mb-2">Coming Soon</h3>
+              <p className="text-neutral-500">Exciting healthy combos are on the way!</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ── New Arrivals ── */}
       <section className="py-10 sm:py-14 md:py-16 bg-white">

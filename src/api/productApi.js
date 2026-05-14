@@ -82,7 +82,28 @@ export const getProductReviews = async (productPk) => {
  * @returns {Promise<object>} Created review
  */
 export const createProductReview = async (payload) => {
-  const response = await api.post('/create-review/', payload);
+  const hasFileUpload = payload?.image instanceof File || payload?.image_2 instanceof File;
+
+  let response;
+  if (hasFileUpload) {
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value);
+      }
+    });
+
+    const multipartHeaders = { ...api.defaults.headers.common };
+    delete multipartHeaders['Content-Type'];
+    delete multipartHeaders['content-type'];
+
+    response = await api.post('/create-review/', formData, {
+      headers: multipartHeaders,
+    });
+  } else {
+    response = await api.post('/create-review/', payload);
+  }
+
   return response.data?.data || response.data;
 };
 

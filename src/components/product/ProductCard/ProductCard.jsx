@@ -1,22 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiHeart, FiShoppingCart, FiEye, FiMessageSquare } from 'react-icons/fi';
+import { FiHeart, FiShoppingCart, FiEye, FiMessageSquare, FiStar } from 'react-icons/fi';
 import { useCurrency } from '../../../context/CurrencyContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import { useShop } from '../../../context/ShopContext';
 import { useToast } from '../../../components/common/Toast/Toast';
+import Modal from '../../../components/common/Modal/Modal';
+import Input, { Textarea } from '../../../components/common/Input/Input';
 import { BestSellerBadge, NewBadge } from '../../common/Badge/Badge';
 import { cn, createSlug } from '../../../utils/helpers';
 import { calculateDiscount } from '../../../utils/currency';
 import { DEFAULT_PRODUCT_IMAGE, SIZE_LABELS } from '../../../utils/constants';
 import { createProductReview } from '../../../api/gods-garden/productApi';
 
-const ProductCard = ({ product, className, hideWishlistButton = false, isWishlisted: isWishlistedOverride, onWishlistChange }) => {
+const ProductCard = ({ product, className, hideWishlistButton = false, isWishlisted: isWishlistedOverride, onWishlistChange, onReviewAdded }) => {
   const { formatPrice } = useCurrency();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToCart, isUpdating } = useShop();
   const toast = useToast();
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewerName, setReviewerName] = useState('');
+  const [reviewDescription, setReviewDescription] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [imageUrl1, setImageUrl1] = useState('');
+  const [imageUrl2, setImageUrl2] = useState('');
+  const [imageFile1, setImageFile1] = useState(null);
+  const [imageFile2, setImageFile2] = useState(null);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   if (!product) return null;
 
@@ -86,21 +98,62 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
     }
   };
 
-  const handleAddReview = async (e) => {
+  const handleReviewButtonClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsReviewModalOpen(true);
+  };
 
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewerName.trim()) {
+      toast.error('Please enter your name.');
+      return;
+    }
+    if (!reviewDescription.trim()) {
+      toast.error('Please enter your review.');
+      return;
+    }
+
+    setIsSubmittingReview(true);
     try {
-      await createProductReview({
+      const payload = {
         product_pk: id,
-        reviewer_name: 'Anonymous',
-        rating: 5,
-        review: 'Amazing product! Highly recommended.',
-      });
-      toast.success('Review added for this product');
+        reviewer_name: reviewerName.trim(),
+        rating: reviewRating,
+        review: reviewDescription.trim(),
+      };
+
+      if (imageFile1) {
+        payload.image = imageFile1;
+      } else if (imageUrl1.trim()) {
+        payload.image = imageUrl1.trim();
+      }
+
+      if (imageFile2) {
+        payload.image_2 = imageFile2;
+      } else if (imageUrl2.trim()) {
+        payload.image_2 = imageUrl2.trim();
+      }
+
+      await createProductReview(payload);
+      toast.success('Review submitted successfully');
+      setIsReviewModalOpen(false);
+      setReviewerName('');
+      setReviewDescription('');
+      setReviewRating(5);
+      setImageUrl1('');
+      setImageUrl2('');
+      setImageFile1(null);
+      setImageFile2(null);
+      if (typeof onReviewAdded === 'function') {
+        onReviewAdded();
+      }
     } catch (error) {
       console.error('Failed to add review:', error);
-      toast.error('Failed to add review');
+      toast.error('Failed to submit review.');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -114,6 +167,105 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
       )}
     >
       {/* Image Container */}
+      <Modal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        title="Write a Review"
+        size="lg"
+      >
+        <form onSubmit={handleReviewSubmit} className="space-y-4">
+          <div className="grid gap-4">
+            <Input
+              label="Your Name"
+              value={reviewerName}
+              onChange={(e) => setReviewerName(e.target.value)}
+              placeholder="Enter your name"
+              required
+            />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-neutral-700">Rating</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    className={cn(
+                      'rounded-full p-2 transition-colors',
+                      star <= reviewRating
+                        ? 'bg-yellow-100 text-yellow-500'
+                        : 'bg-neutral-100 text-neutral-400 hover:text-yellow-500'
+                    )}
+                    aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                  >
+                    <FiStar className="w-5 h-5" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <Textarea
+            label="Review"
+            value={reviewDescription}
+            onChange={(e) => setReviewDescription(e.target.value)}
+            placeholder="Share your thoughts about the product"
+            rows={5}
+            required
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Input
+                label="Image URL 1"
+                value={imageUrl1}
+                onChange={(e) => setImageUrl1(e.target.value)}
+                placeholder="Paste image URL"
+              />
+              <label className="block text-sm font-medium text-neutral-700">Or upload image 1</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile1(e.target.files?.[0] || null)}
+                className="w-full text-sm text-neutral-700"
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                label="Image URL 2"
+                value={imageUrl2}
+                onChange={(e) => setImageUrl2(e.target.value)}
+                placeholder="Paste image URL"
+              />
+              <label className="block text-sm font-medium text-neutral-700">Or upload image 2</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile2(e.target.files?.[0] || null)}
+                className="w-full text-sm text-neutral-700"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => setIsReviewModalOpen(false)}
+              className="w-full sm:w-auto px-4 py-3 rounded-lg border border-neutral-300 text-neutral-700 hover:bg-neutral-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmittingReview}
+              className="w-full sm:w-auto px-4 py-3 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors disabled:opacity-60"
+            >
+              {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
       <Link to={productUrl} className="block relative overflow-hidden bg-neutral-100" style={{ aspectRatio: '1/1' }}>
         <img
           src={main_image || DEFAULT_PRODUCT_IMAGE}
@@ -138,7 +290,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
             </button>
           )}
           <button
-            onClick={handleAddReview}
+            onClick={handleReviewButtonClick}
             className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors text-primary-500"
             aria-label="Add review"
           >

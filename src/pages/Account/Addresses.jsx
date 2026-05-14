@@ -142,7 +142,7 @@ const Addresses = () => {
 
       {/* Address Form */}
       {isFormVisible && (
-        <div className="container-custom mt-8">
+        <div className="absolute top-0 left-0 container-custom mt-8">
           <div className="bg-white rounded-2xl p-8 shadow-soft">
             <div className="flex items-center justify-between mb-6">
               <div>

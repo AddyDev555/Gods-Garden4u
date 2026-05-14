@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiHeart, FiShoppingCart, FiEye } from 'react-icons/fi';
+import { FiHeart, FiShoppingCart, FiEye, FiMessageSquare } from 'react-icons/fi';
 import { useCurrency } from '../../../context/CurrencyContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import { useShop } from '../../../context/ShopContext';
@@ -10,6 +10,7 @@ import { BestSellerBadge, NewBadge } from '../../common/Badge/Badge';
 import { cn, createSlug } from '../../../utils/helpers';
 import { calculateDiscount } from '../../../utils/currency';
 import { DEFAULT_PRODUCT_IMAGE, SIZE_LABELS } from '../../../utils/constants';
+import { createProductReview } from '../../../api/gods-garden/productApi';
 
 const ProductCard = ({ product, className, hideWishlistButton = false, isWishlisted: isWishlistedOverride, onWishlistChange }) => {
   const { formatPrice } = useCurrency();
@@ -85,6 +86,24 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
     }
   };
 
+  const handleAddReview = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      await createProductReview({
+        product_pk: id,
+        reviewer_name: 'Anonymous',
+        rating: 5,
+        review: 'Amazing product! Highly recommended.',
+      });
+      toast.success('Review added for this product');
+    } catch (error) {
+      console.error('Failed to add review:', error);
+      toast.error('Failed to add review');
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -118,6 +137,13 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
               <FiHeart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />
             </button>
           )}
+          <button
+            onClick={handleAddReview}
+            className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors text-primary-500"
+            aria-label="Add review"
+          >
+            <FiMessageSquare className="w-4 h-4" />
+          </button>
           <Link
             to={productUrl}
             className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors"
@@ -126,15 +152,6 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
             <FiEye className="w-4 h-4" />
           </Link>
         </div>
-
-        {/* Out of Stock Overlay */}
-        {!isInStock && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="px-4 py-2 bg-neutral-900 text-white text-sm font-medium rounded-full">
-              Out of Stock
-            </span>
-          </div>
-        )}
       </Link>
 
       {/* Content */}

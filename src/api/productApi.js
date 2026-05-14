@@ -67,6 +67,26 @@ export const getProductsByIds = async (productIds) => {
 };
 
 /**
+ * Get reviews for a product
+ * @param {number|string} productPk - Product primary key
+ * @returns {Promise<Array>} Array of reviews
+ */
+export const getProductReviews = async (productPk) => {
+  const response = await api.get(`/get-all-reviews/?product_pk=${productPk}`);
+  return response.data?.data || response.data || [];
+};
+
+/**
+ * Create a review for a product
+ * @param {object} payload - Review payload
+ * @returns {Promise<object>} Created review
+ */
+export const createProductReview = async (payload) => {
+  const response = await api.post('/create-review/', payload);
+  return response.data?.data || response.data;
+};
+
+/**
  * Get product categories
  * @param {boolean} useCache - Whether to use cached data
  * @returns {Promise<Array>} Array of categories

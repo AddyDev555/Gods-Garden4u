@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { FiHeart, FiMinus, FiPlus, FiShoppingCart, FiZoomIn } from 'react-icons/fi';
 import api from '../../api/gods-garden/axiosConfig';
+import { getProductReviews } from '../../api/gods-garden/productApi';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useShop } from '../../context/ShopContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -30,7 +31,9 @@ const Product = () => {
   const toast = useToast();
 
   const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
@@ -65,6 +68,26 @@ const Product = () => {
     fetchProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, navigate]);
+
+  useEffect(() => {
+    if (!product?.id) {
+      return;
+    }
+
+    const fetchReviews = async () => {
+      setIsLoadingReviews(true);
+      try {
+        const result = await getProductReviews(product.id);
+        setReviews(Array.isArray(result) ? result : result?.data || []);
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      } finally {
+        setIsLoadingReviews(false);
+      }
+    };
+
+    fetchReviews();
+  }, [product?.id]);
 
   if (isLoading) {
     return (
@@ -391,6 +414,68 @@ const Product = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Customer Reviews */}
+              <div className="mt-8 pt-8 border-t border-neutral-200">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+                  <div>
+                    <h2 className="font-semibold text-lg text-neutral-900">Customer Reviews</h2>
+                    <p className="text-sm text-neutral-500">
+                      {isLoadingReviews
+                        ? 'Loading reviews...'
+                        : `${reviews.length} review${reviews.length === 1 ? '' : 's'}`}
+                    </p>
+                  </div>
+                </div>
+
+                {isLoadingReviews ? (
+                  <div className="text-sm text-neutral-500">Loading reviews...</div>
+                ) : reviews.length === 0 ? (
+                  <div className="rounded-2xl border border-neutral-200 p-6 text-neutral-600">
+                    No reviews yet for this product.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="rounded-2xl border border-neutral-200 p-5">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div>
+                            <p className="font-medium text-neutral-900">{review.name || 'Customer'}</p>
+                            <div className="mt-2 flex items-center gap-1 text-yellow-400">
+                              {[...Array(5)].map((_, i) => (
+                                <svg
+                                  key={i}
+                                  className={cn(
+                                    'w-4 h-4',
+                                    i < Math.round(review.rating) ? 'fill-current' : 'text-neutral-200'
+                                  )}
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                </svg>
+                              ))}
+                            </div>
+                          </div>
+                          <span className="text-sm text-neutral-500">Product #{review.product_id}</span>
+                        </div>
+                        <p className="text-neutral-600 mt-4">{review.review}</p>
+                        {review.images?.length > 0 && (
+                          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {review.images.map((img, index) => (
+                              <img
+                                key={index}
+                                src={img}
+                                alt={`Review ${index + 1}`}
+                                className="w-full h-24 object-cover rounded-xl border border-neutral-200"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

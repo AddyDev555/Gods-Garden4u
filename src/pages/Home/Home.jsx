@@ -249,8 +249,7 @@ const HeroCarousel = () => {
               to="/shop"
               className="flex items-center justify-center
                 px-5 py-3 rounded-full
-                border-2 bg-white
-                text-black font-medium text-sm sm:text-base
+                border-2 bg-white text-black font-medium text-sm sm:text-base
               transition-all duration-200"
             >
               Shop Now

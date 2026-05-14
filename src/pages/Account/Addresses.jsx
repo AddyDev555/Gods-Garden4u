@@ -55,11 +55,17 @@ const Addresses = () => {
       return;
     }
 
+    const userId = user?.id || user?.user_id || user?.pk || user?.uid;
+    if (!userId) {
+      toast.error('Unable to detect your user account. Please log in again.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const endpoint = isEditing ? '/edit-user-address/' : '/add-user-address/';
       const response = await api.post(endpoint, {
-        user_id: user.id,
+        user_id: userId,
         address: formData.address.trim(),
       });
 

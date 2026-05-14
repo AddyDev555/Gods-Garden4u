@@ -7,7 +7,8 @@ import { useToast } from '../../components/common/Toast/Toast';
 import Button from '../../components/common/Button/Button';
 import { Textarea } from '../../components/common/Input/Input';
 import api from '../../api/gods-garden/axiosConfig';
-import { storage, STORAGE_KEYS } from '../../utils/helpers';
+import { storage } from '../../utils/helpers';
+import { STORAGE_KEYS } from '../../utils/constants';
 
 const Addresses = () => {
   const { user, setUser } = useAuth();

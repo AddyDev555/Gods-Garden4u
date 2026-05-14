@@ -70,7 +70,7 @@ const Account = () => {
                   </div>
                 </div>
 
-                <div className="grid gap-3 mb-6">
+                {/* <div className="grid gap-3 mb-6">
                   <Link
                     to="/account/orders"
                     className="block text-center px-4 py-3 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
@@ -83,7 +83,7 @@ const Account = () => {
                   >
                     Manage Addresses
                   </Link>
-                </div>
+                </div> */}
 
                 {/* <nav className="space-y-2">
                   {menuItems.map((item) => {

@@ -1,10 +1,80 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { FiMapPin } from 'react-icons/fi';
+import { FiMapPin, FiEdit2, FiPlus, FiX } from 'react-icons/fi';
 import { SITE_NAME } from '../../utils/constants';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../components/common/Toast/Toast';
 import Button from '../../components/common/Button/Button';
+import { Textarea } from '../../components/common/Input/Input';
+import Modal from '../../components/common/Modal/Modal';
+import api from '../../api/gods-garden/axiosConfig';
+import { storage, STORAGE_KEYS } from '../../utils/helpers';
 
 const Addresses = () => {
+  const { user, setUser } = useAuth();
+  const toast = useToast();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    address: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const openAddModal = () => {
+    setIsEditing(false);
+    setFormData({ address: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = () => {
+    setIsEditing(true);
+    setFormData({ address: user?.address || '' });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setFormData({ address: '' });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.address.trim()) {
+      toast.error('Please enter an address');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const endpoint = isEditing ? '/edit-user-address/' : '/add-user-address/';
+      const response = await api.post(endpoint, {
+        user_id: user.id,
+        address: formData.address.trim(),
+      });
+
+      toast.success(response.data.message);
+
+      // Update user context and local storage with new address
+      const updatedUser = { ...user, address: response.data.address };
+      setUser(updatedUser);
+      storage.set(STORAGE_KEYS.USER, updatedUser);
+
+      closeModal();
+    } catch (error) {
+      console.error('Address operation error:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to save address. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -16,18 +86,102 @@ const Addresses = () => {
         <div className="container-custom">
           <div className="flex items-center justify-between mb-8">
             <h1 className="font-display text-3xl font-bold text-neutral-900">My Addresses</h1>
-            <Button>Add Address</Button>
+            {!user?.address && (
+              <Button onClick={openAddModal} className="flex items-center gap-2">
+                <FiPlus className="w-4 h-4" />
+                Add Address
+              </Button>
+            )}
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-soft text-center">
-            <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiMapPin className="w-10 h-10 text-neutral-400" />
+          {user?.address ? (
+            <div className="bg-white rounded-2xl p-6 shadow-soft">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <FiMapPin className="w-5 h-5 text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg text-neutral-900 mb-1">Default Address</h3>
+                    <p className="text-neutral-600 whitespace-pre-line">{user.address}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={openEditModal}
+                  className="flex items-center gap-2"
+                >
+                  <FiEdit2 className="w-4 h-4" />
+                  Edit
+                </Button>
+              </div>
             </div>
-            <h2 className="text-xl font-semibold text-neutral-900 mb-2">No addresses saved</h2>
-            <p className="text-neutral-600">Add an address for faster checkout</p>
-          </div>
+          ) : (
+            <div className="bg-white rounded-2xl p-8 shadow-soft text-center">
+              <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiMapPin className="w-10 h-10 text-neutral-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-neutral-900 mb-2">No addresses saved</h2>
+              <p className="text-neutral-600 mb-6">Add an address for faster checkout</p>
+              <Button onClick={openAddModal} className="flex items-center gap-2">
+                <FiPlus className="w-4 h-4" />
+                Add Address
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Address Modal */}
+      <Modal isOpen={isModalOpen} onClose={closeModal}>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-neutral-900">
+              {isEditing ? 'Edit Address' : 'Add Address'}
+            </h2>
+            <button
+              onClick={closeModal}
+              className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+            >
+              <FiX className="w-5 h-5 text-neutral-500" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <Textarea
+                label="Address"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                rows={4}
+                placeholder="Enter your full address including street, city, state, and PIN code"
+                required
+              />
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeModal}
+                className="flex-1"
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Saving...' : (isEditing ? 'Update Address' : 'Add Address')}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
     </>
   );
 };

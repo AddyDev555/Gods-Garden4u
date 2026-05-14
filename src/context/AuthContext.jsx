@@ -170,8 +170,9 @@ export const AuthProvider = ({ children }) => {
       logout,
       updateProfile,
       clearError,
+      setUser, // Expose setUser for direct state updates
     }),
-    [user, token, isLoading, error, isAuthenticated, login, register, logout, updateProfile, clearError]
+    [user, token, isLoading, error, isAuthenticated, login, register, logout, updateProfile, clearError, setUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

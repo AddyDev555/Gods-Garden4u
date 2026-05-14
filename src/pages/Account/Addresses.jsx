@@ -6,7 +6,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast/Toast';
 import Button from '../../components/common/Button/Button';
 import { Textarea } from '../../components/common/Input/Input';
-import Modal from '../../components/common/Modal/Modal';
 import api from '../../api/gods-garden/axiosConfig';
 import { storage, STORAGE_KEYS } from '../../utils/helpers';
 
@@ -14,11 +13,11 @@ const Addresses = () => {
   const { user, setUser } = useAuth();
   const toast = useToast();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    address: '',
+    address: user?.address || '',
   });
 
   const handleInputChange = (e) => {
@@ -26,22 +25,26 @@ const Addresses = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const openAddModal = () => {
+  const openAddForm = () => {
     setIsEditing(false);
     setFormData({ address: '' });
-    setIsModalOpen(true);
+    setIsFormVisible(true);
   };
 
-  const openEditModal = () => {
+  const openEditForm = () => {
     setIsEditing(true);
     setFormData({ address: user?.address || '' });
-    setIsModalOpen(true);
+    setIsFormVisible(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setFormData({ address: '' });
+  const closeForm = () => {
+    setIsFormVisible(false);
+    setFormData({ address: user?.address || '' });
   };
+
+  React.useEffect(() => {
+    setFormData({ address: user?.address || '' });
+  }, [user?.address]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,7 +68,7 @@ const Addresses = () => {
       setUser(updatedUser);
       storage.set(STORAGE_KEYS.USER, updatedUser);
 
-      closeModal();
+      closeForm();
     } catch (error) {
       console.error('Address operation error:', error);
       const errorMessage = error.response?.data?.error || 'Failed to save address. Please try again.';
@@ -86,12 +89,10 @@ const Addresses = () => {
         <div className="container-custom">
           <div className="flex items-center justify-between mb-8">
             <h1 className="font-display text-3xl font-bold text-neutral-900">My Addresses</h1>
-            {!user?.address && (
-              <Button onClick={openAddModal} className="flex items-center gap-2">
-                <FiPlus className="w-4 h-4" />
-                Add Address
-              </Button>
-            )}
+            <Button onClick={openAddForm} className="flex items-center gap-2">
+              <FiPlus className="w-4 h-4" />
+              {user?.address ? 'Edit Address' : 'Add Address'}
+            </Button>
           </div>
 
           {user?.address ? (
@@ -109,7 +110,7 @@ const Addresses = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={openEditModal}
+                  onClick={openEditForm}
                   className="flex items-center gap-2"
                 >
                   <FiEdit2 className="w-4 h-4" />
@@ -124,7 +125,7 @@ const Addresses = () => {
               </div>
               <h2 className="text-xl font-semibold text-neutral-900 mb-2">No addresses saved</h2>
               <p className="text-neutral-600 mb-6">Add an address for faster checkout</p>
-              <Button onClick={openAddModal} className="flex items-center gap-2">
+              <Button onClick={openAddForm} className="flex items-center gap-2">
                 <FiPlus className="w-4 h-4" />
                 Add Address
               </Button>
@@ -133,55 +134,65 @@ const Addresses = () => {
         </div>
       </div>
 
-      {/* Address Modal */}
-      <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-neutral-900">
-              {isEditing ? 'Edit Address' : 'Add Address'}
-            </h2>
-            <button
-              onClick={closeModal}
-              className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
-            >
-              <FiX className="w-5 h-5 text-neutral-500" />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <Textarea
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                rows={4}
-                placeholder="Enter your full address including street, city, state, and PIN code"
-                required
-              />
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <Button
+      {/* Address Form */}
+      {isFormVisible && (
+        <div className="container-custom mt-8">
+          <div className="bg-white rounded-2xl p-8 shadow-soft">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-neutral-900">
+                  {isEditing ? 'Edit Address' : 'Add Address'}
+                </h2>
+                <p className="text-neutral-500 text-sm">
+                  {isEditing
+                    ? 'Update your saved address below.'
+                    : 'Enter the full address you want saved to your account.'}
+                </p>
+              </div>
+              <button
                 type="button"
-                variant="outline"
-                onClick={closeModal}
-                className="flex-1"
-                disabled={isLoading}
+                onClick={closeForm}
+                className="inline-flex items-center justify-center p-2 rounded-lg text-neutral-500 hover:bg-neutral-100 transition-colors"
               >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Saving...' : (isEditing ? 'Update Address' : 'Add Address')}
-              </Button>
+                <FiX className="w-5 h-5" />
+              </button>
             </div>
-          </form>
+
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <Textarea
+                  label="Address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  rows={5}
+                  placeholder="Enter your full address including street, city, state, and PIN code"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeForm}
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Saving...' : (isEditing ? 'Update Address' : 'Add Address')}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
-      </Modal>
+      )}
     </>
   );
 };

@@ -85,7 +85,7 @@ const Account = () => {
                   </Link>
                 </div>
 
-                <nav className="space-y-2">
+                {/* <nav className="space-y-2">
                   {menuItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -99,7 +99,7 @@ const Account = () => {
                       </Link>
                     );
                   })}
-                </nav>
+                </nav> */}
 
                 <hr className="my-4" />
 

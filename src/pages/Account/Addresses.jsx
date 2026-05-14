@@ -14,6 +14,7 @@ const Addresses = () => {
   const { user, setUser } = useAuth();
   const toast = useToast();
 
+  const hasAddress = Boolean(user?.address?.trim());
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,13 +91,15 @@ const Addresses = () => {
         <div className="container-custom">
           <div className="flex items-center justify-between mb-8">
             <h1 className="font-display text-3xl font-bold text-neutral-900">My Addresses</h1>
+            {!isFormVisible && (
             <Button onClick={openAddForm} className="flex items-center gap-2">
               <FiPlus className="w-4 h-4" />
-              {user?.address ? 'Edit Address' : 'Add Address'}
+              {hasAddress ? 'Edit Address' : 'Add Address'}
             </Button>
+          )}
           </div>
 
-          {user?.address ? (
+          {!isFormVisible && hasAddress && (
             <div className="bg-white rounded-2xl p-6 shadow-soft">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start gap-3">
@@ -119,7 +122,9 @@ const Addresses = () => {
                 </Button>
               </div>
             </div>
-          ) : (
+          )}
+
+          {!isFormVisible && !hasAddress && (
             <div className="bg-white rounded-2xl p-8 shadow-soft text-center">
               <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiMapPin className="w-10 h-10 text-neutral-400" />

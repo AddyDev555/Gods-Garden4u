@@ -214,7 +214,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
             required
           />
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          {/* <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Input
                 label="Image URL 1"
@@ -245,7 +245,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
                 className="w-full text-sm text-neutral-700"
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button

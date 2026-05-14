@@ -491,8 +491,6 @@ const Home = () => {
       </section>
 
 
-
-
       {/* ── Healthy Combos ── */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">

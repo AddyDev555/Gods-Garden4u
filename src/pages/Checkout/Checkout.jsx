@@ -14,7 +14,7 @@ import { cn } from '../../utils/helpers';
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, cartId, clearCart, cartTotals } = useShop();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { formatPrice, currency, isIndia } = useCurrency();
   const toast = useToast();
 
@@ -64,6 +64,19 @@ const Checkout = () => {
     }
     return true;
   };
+
+  useEffect(() => {
+    if (user) {
+      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      setForm((prev) => ({
+        ...prev,
+        name: fullName || user.name || prev.name,
+        email: user.email || prev.email,
+        mobile_number: user.mobile_number || prev.mobile_number,
+        country_code: user.country_code ? String(user.country_code) : prev.country_code,
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isAuthenticated) {

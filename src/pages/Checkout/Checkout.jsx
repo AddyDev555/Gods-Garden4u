@@ -74,6 +74,7 @@ const Checkout = () => {
         email: user.email || prev.email,
         mobile_number: user.mobile_number || prev.mobile_number,
         country_code: user.country_code ? String(user.country_code) : prev.country_code,
+        delivery_address: user.address || prev.delivery_address,
       }));
     }
   }, [user]);

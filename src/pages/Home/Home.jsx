@@ -509,7 +509,7 @@ const Home = () => {
             </motion.p>
           </motion.div>
 
-          {healthyComboProducts.length > 0 ? (
+          {isLoadingCategories || healthyComboProducts.length > 0 ? (
             <>
               {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
@@ -532,7 +532,7 @@ const Home = () => {
                 </Button>
               </div>
             </>
-          ) : (
+          ) : !isLoadingCategories && (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🥗</div>
               <h3 className="text-xl font-semibold text-neutral-700 mb-2">Coming Soon</h3>

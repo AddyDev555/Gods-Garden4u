@@ -281,7 +281,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
               onClick={handleToggleWishlist}
               className={cn(
                 'group/tooltip relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center',
-                'hover:bg-primary-50 transition-colors',
+                'hover:bg-primary-50 transition-colors mb-2',
                 isWishlisted && 'text-error-500'
               )}
               aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -294,7 +294,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
           )}
           <button
             onClick={handleReviewButtonClick}
-            className="group/tooltip relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors text-primary-500"
+            className="group/tooltip mb-2 relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors text-primary-500"
             aria-label="Add review"
           >
             <FiMessageSquare className="w-4 h-4" />
@@ -304,7 +304,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
           </button>
           <Link
             to={productUrl}
-            className="group/tooltip relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors"
+            className="group/tooltip mb-2 relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors"
             aria-label="View product"
           >
             <FiEye className="w-4 h-4" />

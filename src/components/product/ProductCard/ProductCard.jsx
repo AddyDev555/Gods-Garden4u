@@ -275,7 +275,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
         />
 
         {/* Quick Actions */}
-        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-3 right-3 gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           {!hideWishlistButton && (
             <button
               onClick={handleToggleWishlist}

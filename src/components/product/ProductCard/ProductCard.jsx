@@ -275,7 +275,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
         />
 
         {/* Quick Actions */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           {!hideWishlistButton && (
             <button
               onClick={handleToggleWishlist}
@@ -287,7 +287,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
               aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <FiHeart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />
-              <span className="absolute right-full mr-2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
+              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
                 {isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
               </span>
             </button>
@@ -298,7 +298,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
             aria-label="Add review"
           >
             <FiMessageSquare className="w-4 h-4" />
-            <span className="absolute right-full mr-2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
+            <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
               Add Review
             </span>
           </button>
@@ -308,7 +308,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
             aria-label="View product"
           >
             <FiEye className="w-4 h-4" />
-            <span className="absolute right-full mr-2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
+            <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
               View Details
             </span>
           </Link>

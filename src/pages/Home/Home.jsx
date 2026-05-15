@@ -141,6 +141,7 @@ const CATEGORY_NAME_ALIAS = {
   'leaf & superfood': 'leaf / superfood',
   'fruit & vegetable powders': 'fruits & vegetable powders',
   'fruits and vegetable powders': 'fruits & vegetable powders',
+  'healthy combos': 'healthy combo'
 };
 
 const normalizeCategoryName = (name) => {
@@ -352,7 +353,7 @@ const Home = () => {
 
         // Find Healthy Combo category and fetch its products
         const healthyComboCategory = sortedCats.find(cat =>
-          normalizeCategoryName(cat.name) === 'healthy combos'
+          normalizeCategoryName(cat.name) === 'healthy combo'
         );
         if (healthyComboCategory) {
           const healthyProducts = await getAllProducts(healthyComboCategory.id);

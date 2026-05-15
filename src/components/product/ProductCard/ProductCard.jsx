@@ -280,28 +280,37 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
             <button
               onClick={handleToggleWishlist}
               className={cn(
-                'w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center',
+                'group/tooltip relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center',
                 'hover:bg-primary-50 transition-colors',
                 isWishlisted && 'text-error-500'
               )}
               aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <FiHeart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />
+              <span className="absolute right-full mr-2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
+                {isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+              </span>
             </button>
           )}
           <button
             onClick={handleReviewButtonClick}
-            className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors text-primary-500"
+            className="group/tooltip relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors text-primary-500"
             aria-label="Add review"
           >
             <FiMessageSquare className="w-4 h-4" />
+            <span className="absolute right-full mr-2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
+              Add Review
+            </span>
           </button>
           <Link
             to={productUrl}
-            className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors"
+            className="group/tooltip relative w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-primary-50 transition-colors"
             aria-label="View product"
           >
             <FiEye className="w-4 h-4" />
+            <span className="absolute right-full mr-2 px-2 py-1 bg-neutral-900/90 text-white text-[10px] font-medium rounded pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap shadow-sm">
+              View Details
+            </span>
           </Link>
         </div>
       </Link>

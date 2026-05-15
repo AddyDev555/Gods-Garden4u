@@ -31,7 +31,7 @@ const WhatsAppButton = ({ className = '', size = 'md', label = 'Chat on WhatsApp
       rel="noopener noreferrer"
       className={`inline-flex items-center justify-center font-semibold rounded-lg
         bg-[#25D366] hover:bg-[#20bd5a] active:bg-[#1aaa50]
-        text-white shadow-lg hover:shadow-xl
+        shadow-lg hover:shadow-xl
         transition-all duration-200 hover:scale-105 active:scale-95
         ${sizeClasses[size]} ${className}`}
     >
@@ -249,10 +249,10 @@ const HeroCarousel = () => {
               to="/shop"
               className="flex items-center justify-center
                 px-5 py-3 rounded-full
-                border-2 bg-white text-black font-medium text-sm sm:text-base
+                border-2 bg-white font-medium text-sm sm:text-base
               transition-all duration-200"
             >
-              Shop Now
+              <p className="text-black">Shop Now</p>
               <FiArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </motion.div>

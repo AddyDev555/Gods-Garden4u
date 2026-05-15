@@ -352,7 +352,7 @@ const Home = () => {
 
         // Find Healthy Combo category and fetch its products
         const healthyComboCategory = sortedCats.find(cat =>
-          normalizeCategoryName(cat.name) === 'healthy combo'
+          normalizeCategoryName(cat.name) === 'healthy combos'
         );
         if (healthyComboCategory) {
           const healthyProducts = await getAllProducts(healthyComboCategory.id);

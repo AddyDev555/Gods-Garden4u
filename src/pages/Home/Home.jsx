@@ -332,20 +332,16 @@ const Home = () => {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   useEffect(() => {
-    // ── Healthy Combos: fetch all products, then filter by category_id === 5 ──
+    // ── Healthy Combos: fetch ALL products, unwrap response.data, filter by category_id === 5 ──
     const fetchHealthyCombos = async () => {
       setIsLoadingCategories(true);
       try {
-        // First try fetching with the category ID as a param (works if your API supports it)
-        const response = await getAllProducts(HEALTHY_COMBO_CATEGORY_ID);
-        let products = unwrapProducts(response).map(transformProductData);
-
-        // Client-side safety net: keep only category_id 5 products
-        const filtered = products.filter((p) => p.category_id === HEALTHY_COMBO_CATEGORY_ID);
-
-        // If the API param worked the filter returns the same list; if not, it
-        // correctly narrows from the full catalogue.
-        setHealthyComboProducts((filtered.length ? filtered : products).slice(0, 8));
+        const response = await getAllProducts();
+        // API returns { data: [...] } — unwrap it
+        const allProducts = unwrapProducts(response).map(transformProductData);
+        // Keep only category_id 5 (Healthy Combo)
+        const filtered = allProducts.filter((p) => p.category_id === HEALTHY_COMBO_CATEGORY_ID);
+        setHealthyComboProducts(filtered.slice(0, 8));
       } catch (error) {
         console.error('Failed to fetch healthy combo products:', error);
         setHealthyComboProducts([]);
@@ -354,11 +350,12 @@ const Home = () => {
       }
     };
 
-    // ── New Arrivals ──────────────────────────────────────────────────────────
+    // ── New Arrivals: unwrap response.data ────────────────────────────────────
     const fetchNewArrivals = async () => {
       setIsLoadingProducts(true);
       try {
         const response = await getNewArrivalProducts();
+        // API returns { data: [...] } — unwrap it
         const products = unwrapProducts(response).map(transformProductData).slice(0, 8);
         setNewArrivalProducts(products);
       } catch (error) {
@@ -369,10 +366,12 @@ const Home = () => {
       }
     };
 
-    // ── Categories (for "Shop by Category" grid) ──────────────────────────────
+    // ── Categories (Shop by Category grid) ───────────────────────────────────
     const fetchCategories = async () => {
       try {
-        const cats = await getProductCategories();
+        const response = await getProductCategories();
+        // Handle both raw array and { data: [...] } shapes
+        const cats = Array.isArray(response) ? response : (response?.data ?? []);
         setCategories(sortCategoriesByHomepageOrder(cats));
       } catch (error) {
         console.error('Failed to fetch categories:', error);

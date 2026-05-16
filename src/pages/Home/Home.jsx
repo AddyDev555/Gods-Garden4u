@@ -8,7 +8,7 @@ import { getOrganizationSchema, getWebSiteSchema, serializeSchema } from '../../
 import Button from '../../components/common/Button/Button';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
-import { getTopSellingProducts, getNewArrivalProducts, getProductCategories, getAllProducts } from '../../api/gods-garden/productApi';
+import { getNewArrivalProducts, getProductCategories, getAllProducts } from '../../api/gods-garden/productApi';
 import IntroPopup from '../../components/common/Splash-Screen/Splash';
 
 // ─── WhatsApp config ──────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ const CATEGORY_NAME_ALIAS = {
   'leaf & superfood': 'leaf / superfood',
   'fruit & vegetable powders': 'fruits & vegetable powders',
   'fruits and vegetable powders': 'fruits & vegetable powders',
-  'healthy combos': 'healthy combo'
+  'healthy combos': 'healthy combo',
 };
 
 const normalizeCategoryName = (name) => {
@@ -163,22 +163,32 @@ const sortCategoriesByHomepageOrder = (categories) =>
     return (a.name || '').localeCompare(b.name || '');
   });
 
-// Helper function to transform product data from API response
-const transformProductData = (product) => {
-  return {
-    id: product.id,
-    name: product.product_name || product.name,
-    price: product.price,
-    originalPrice: product.original_price || product.mrp,
-    discount: product.discount,
-    images: product.images || (product.image ? [product.image] : []),
-    stock: product.stock,
-    slug: product.slug || product.product_slug,
-    unit: product.unit,
-    category_id: product.category_id,
-    description: product.description,
-  };
+// ─── Helper: unwrap any API response shape into a plain array ─────────────────
+const unwrapProducts = (response) => {
+  if (!response) return [];
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response.data)) return response.data;
+  if (Array.isArray(response.products)) return response.products;
+  if (Array.isArray(response.results)) return response.results;
+  return [];
 };
+
+// ─── Helper: normalise a single product object ────────────────────────────────
+const transformProductData = (product) => ({
+  id: product.id,
+  name: product.product_name || product.name,
+  price: product.price,
+  originalPrice: product.original_price || product.mrp,
+  discount: product.discount,
+  images: product.images || (product.image ? [product.image] : []),
+  stock: product.stock,
+  slug: product.slug || product.product_slug,
+  unit: product.unit,
+  category_id: product.category_id,
+  description: product.description,
+});
+
+const HEALTHY_COMBO_CATEGORY_ID = 5;
 
 // ─── HeroCarousel ─────────────────────────────────────────────────────────────
 const HeroCarousel = () => {
@@ -196,8 +206,8 @@ const HeroCarousel = () => {
   }, [activeIndex, goTo]);
 
   const next = useCallback(() => {
-    const next = (activeIndex + 1) % HERO_SLIDES.length;
-    goTo(next, 1);
+    const n = (activeIndex + 1) % HERO_SLIDES.length;
+    goTo(n, 1);
   }, [activeIndex, goTo]);
 
   useEffect(() => {
@@ -241,7 +251,7 @@ const HeroCarousel = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
         </motion.div>
       </AnimatePresence>
-      
+
       <div className="absolute left-0 right-0 bottom-10 flex items-center justify-center z-10">
         <motion.div
           custom={4}
@@ -250,11 +260,7 @@ const HeroCarousel = () => {
           animate="visible"
           className="flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
         >
-          <WhatsAppButton
-            label="Order on WhatsApp"
-            size="md"
-            className="shadow-2xl"
-          />
+          <WhatsAppButton label="Order on WhatsApp" size="md" className="shadow-2xl" />
           <Button
             as={Link}
             to="/shop"
@@ -299,10 +305,7 @@ const HeroCarousel = () => {
             onClick={() => goTo(i, i > activeIndex ? 1 : -1)}
             aria-label={`Go to slide ${i + 1}`}
             className={`transition-all duration-300 rounded-full
-              ${i === activeIndex
-                ? 'w-6 h-2 bg-white'
-                : 'w-2 h-2 bg-white/45 hover:bg-white/70'
-              }`}
+              ${i === activeIndex ? 'w-6 h-2 bg-white' : 'w-2 h-2 bg-white/45 hover:bg-white/70'}`}
           />
         ))}
       </div>
@@ -322,86 +325,64 @@ const HeroCarousel = () => {
 
 // ─── Home ─────────────────────────────────────────────────────────────────────
 const Home = () => {
-  // Remove topSellingProducts since it's not being used
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
   const [healthyComboProducts, setHealthyComboProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  // Fetch products for a specific category
-  const fetchProductsByCategory = useCallback(async (categoryId) => {
-    try {
-      const response = await getAllProducts(categoryId);
-      
-      // Handle different response structures
-      let products = [];
-      if (Array.isArray(response)) {
-        products = response;
-      } else if (response?.data && Array.isArray(response.data)) {
-        products = response.data;
-      } else if (response?.products && Array.isArray(response.products)) {
-        products = response.products;
-      } else if (response?.results && Array.isArray(response.results)) {
-        products = response.results;
-      }
-      
-      return products.map(transformProductData);
-    } catch (error) {
-      console.error(`Error fetching products for category ${categoryId}:`, error);
-      return [];
-    }
-  }, []);
-
   useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoadingProducts(true);
-      try {
-        // Only fetch new arrivals since top selling is not being used
-        const newArrivals = await getNewArrivalProducts();
-        
-        const transformedNewArrivals = Array.isArray(newArrivals)
-          ? newArrivals.map(transformProductData).slice(0, 8)
-          : [];
-        
-        setNewArrivalProducts(transformedNewArrivals);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-      } finally {
-        setIsLoadingProducts(false);
-      }
-    };
-
-    const fetchCategories = async () => {
+    // ── Healthy Combos: fetch all products, then filter by category_id === 5 ──
+    const fetchHealthyCombos = async () => {
       setIsLoadingCategories(true);
       try {
-        const cats = await getProductCategories();
-        const sortedCats = sortCategoriesByHomepageOrder(cats);
-        setCategories(sortedCats);
+        // First try fetching with the category ID as a param (works if your API supports it)
+        const response = await getAllProducts(HEALTHY_COMBO_CATEGORY_ID);
+        let products = unwrapProducts(response).map(transformProductData);
 
-        // Find Healthy Combo category (category_id: 5)
-        const healthyComboCategory = sortedCats.find(cat => 
-          cat.id === 5 || normalizeCategoryName(cat.name) === 'healthy combo'
-        );
-        
-        if (healthyComboCategory) {
-          const healthyProducts = await fetchProductsByCategory(healthyComboCategory.id);
-          setHealthyComboProducts(healthyProducts.slice(0, 8));
-        } else {
-          // If no healthy combo category found, try with ID 5 directly
-          const healthyProducts = await fetchProductsByCategory(5);
-          setHealthyComboProducts(healthyProducts.slice(0, 8));
-        }
+        // Client-side safety net: keep only category_id 5 products
+        const filtered = products.filter((p) => p.category_id === HEALTHY_COMBO_CATEGORY_ID);
+
+        // If the API param worked the filter returns the same list; if not, it
+        // correctly narrows from the full catalogue.
+        setHealthyComboProducts((filtered.length ? filtered : products).slice(0, 8));
       } catch (error) {
-        console.error('Failed to fetch categories:', error);
+        console.error('Failed to fetch healthy combo products:', error);
+        setHealthyComboProducts([]);
       } finally {
         setIsLoadingCategories(false);
       }
     };
 
-    fetchProducts();
+    // ── New Arrivals ──────────────────────────────────────────────────────────
+    const fetchNewArrivals = async () => {
+      setIsLoadingProducts(true);
+      try {
+        const response = await getNewArrivalProducts();
+        const products = unwrapProducts(response).map(transformProductData).slice(0, 8);
+        setNewArrivalProducts(products);
+      } catch (error) {
+        console.error('Failed to fetch new arrival products:', error);
+        setNewArrivalProducts([]);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    // ── Categories (for "Shop by Category" grid) ──────────────────────────────
+    const fetchCategories = async () => {
+      try {
+        const cats = await getProductCategories();
+        setCategories(sortCategoriesByHomepageOrder(cats));
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+
+    fetchHealthyCombos();
+    fetchNewArrivals();
     fetchCategories();
-  }, [fetchProductsByCategory]);
+  }, []);
 
   const benefits = [
     {
@@ -437,7 +418,10 @@ const Home = () => {
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE_URL} />
         <link rel="canonical" href={SITE_URL} />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Lato:wght@400;600&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Lato:wght@400;600&display=swap"
+          rel="stylesheet"
+        />
         <script type="application/ld+json">
           {serializeSchema([getOrganizationSchema(), getWebSiteSchema()])}
         </script>
@@ -470,14 +454,14 @@ const Home = () => {
             variants={stagger}
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
           >
-            {isLoadingCategories ? (
+            {categories.length === 0 ? (
               [...Array(4)].map((_, i) => (
                 <div key={i} className="flex flex-col items-center gap-3">
                   <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-neutral-200 rounded-full animate-pulse" />
                   <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse" />
                 </div>
               ))
-            ) : categories.length > 0 ? (
+            ) : (
               categories.slice(0, 8).map((category) => (
                 <motion.div key={category.id} variants={fadeInUp}>
                   <Link
@@ -499,30 +483,12 @@ const Home = () => {
                   </Link>
                 </motion.div>
               ))
-            ) : (
-              [
-                { name: 'Fruits chips', emoji: '🍎', slug: 'fruits-chips' },
-                { name: 'Healthy Combo', emoji: '🥗', slug: 'healthy-combo' },
-                { name: 'Leaf / Superfood', emoji: '🌿', slug: 'leaf-superfood' },
-                { name: 'Fruits & Vegetable Powders', emoji: '🥦', slug: 'fruits-vegetable-powders' },
-              ].map((category) => (
-                <motion.div key={category.slug} variants={fadeInUp}>
-                  <Link to={`/category/${category.slug}`} className="flex flex-col items-center gap-2 sm:gap-3 group">
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                      <span className="text-3xl sm:text-4xl lg:text-6xl">{category.emoji}</span>
-                    </div>
-                    <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-neutral-800 text-center group-hover:text-primary-600 transition-colors">
-                      {category.name}
-                    </h3>
-                  </Link>
-                </motion.div>
-              ))
             )}
           </motion.div>
         </div>
       </section>
 
-      {/* Healthy Combos - Fixed to show only category 5 products */}
+      {/* Healthy Combos – products with category_id === 5 */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
@@ -556,7 +522,7 @@ const Home = () => {
               <div className="text-center mt-8 sm:mt-10">
                 <Button
                   as={Link}
-                  to="/shop?category=5"
+                  to={`/shop?category=${HEALTHY_COMBO_CATEGORY_ID}`}
                   variant="outline"
                   icon={<FiArrowRight />}
                   iconPosition="right"
@@ -575,7 +541,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* New Arrivals - Separate section */}
+      {/* New Arrivals */}
       <section className="py-10 sm:py-14 md:py-16 bg-white">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
@@ -596,9 +562,17 @@ const Home = () => {
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {isLoadingProducts
               ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
-              : newArrivalProducts.map((product) => (
+              : newArrivalProducts.length > 0
+              ? newArrivalProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
-                ))}
+                ))
+              : (
+                <div className="col-span-full text-center py-12">
+                  <div className="text-6xl mb-4">🌱</div>
+                  <h3 className="text-xl font-semibold text-neutral-700 mb-2">Coming Soon</h3>
+                  <p className="text-neutral-500">New products are on the way!</p>
+                </div>
+              )}
           </div>
 
           {newArrivalProducts.length > 0 && (
@@ -636,11 +610,7 @@ const Home = () => {
               Join thousands of happy customers who trust Gods Garden. Order directly or ask us anything — we're just a message away!
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-              <WhatsAppButton
-                label="Chat &amp; Order on WhatsApp"
-                size="lg"
-                className="w-full sm:w-auto"
-              />
+              <WhatsAppButton label="Chat &amp; Order on WhatsApp" size="lg" className="w-full sm:w-auto" />
               <Link
                 to="/shop"
                 className="inline-flex items-center justify-center gap-2

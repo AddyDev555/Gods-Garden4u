@@ -322,7 +322,7 @@ const HeroCarousel = () => {
 
 // ─── Home ─────────────────────────────────────────────────────────────────────
 const Home = () => {
-  const [topSellingProducts, setTopSellingProducts] = useState([]);
+  // Remove topSellingProducts since it's not being used
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
   const [healthyComboProducts, setHealthyComboProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -357,20 +357,13 @@ const Home = () => {
     const fetchProducts = async () => {
       setIsLoadingProducts(true);
       try {
-        const [topSelling, newArrivals] = await Promise.all([
-          getTopSellingProducts(),
-          getNewArrivalProducts(),
-        ]);
-        
-        const transformedTopSelling = Array.isArray(topSelling) 
-          ? topSelling.map(transformProductData).slice(0, 8)
-          : [];
+        // Only fetch new arrivals since top selling is not being used
+        const newArrivals = await getNewArrivalProducts();
         
         const transformedNewArrivals = Array.isArray(newArrivals)
           ? newArrivals.map(transformProductData).slice(0, 8)
           : [];
         
-        setTopSellingProducts(transformedTopSelling);
         setNewArrivalProducts(transformedNewArrivals);
       } catch (error) {
         console.error('Failed to fetch products:', error);

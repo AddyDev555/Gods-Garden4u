@@ -164,6 +164,24 @@ const sortCategoriesByHomepageOrder = (categories) =>
     return (a.name || '').localeCompare(b.name || '');
   });
 
+// Helper function to transform product data from API response
+const transformProductData = (product) => {
+  return {
+    id: product.id,
+    name: product.product_name || product.name,
+    price: product.price,
+    originalPrice: product.original_price || product.mrp,
+    discount: product.discount,
+    images: product.images || (product.image ? [product.image] : []),
+    stock: product.stock,
+    slug: product.slug || product.product_slug,
+    unit: product.unit,
+    category_id: product.category_id,
+    description: product.description,
+    ...product // Keep any additional fields
+  };
+};
+
 // ─── HeroCarousel ─────────────────────────────────────────────────────────────
 const HeroCarousel = () => {
   const [[activeIndex, direction], setSlide] = useState([0, 0]);
@@ -319,7 +337,6 @@ const HeroCarousel = () => {
 
 // ─── Home ─────────────────────────────────────────────────────────────────────
 const Home = () => {
-  // eslint-disable-next-line no-unused-vars
   const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
   const [healthyComboProducts, setHealthyComboProducts] = useState([]);
@@ -335,8 +352,19 @@ const Home = () => {
           getTopSellingProducts(),
           getNewArrivalProducts(),
         ]);
-        setTopSellingProducts(topSelling.slice(0, 8));
-        setNewArrivalProducts(newArrivals.slice(0, 8));
+        
+        // Transform top selling products
+        const transformedTopSelling = Array.isArray(topSelling) 
+          ? topSelling.map(transformProductData).slice(0, 8)
+          : [];
+        
+        // Transform new arrival products
+        const transformedNewArrivals = Array.isArray(newArrivals)
+          ? newArrivals.map(transformProductData).slice(0, 8)
+          : [];
+        
+        setTopSellingProducts(transformedTopSelling);
+        setNewArrivalProducts(transformedNewArrivals);
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {
@@ -351,13 +379,33 @@ const Home = () => {
         const sortedCats = sortCategoriesByHomepageOrder(cats);
         setCategories(sortedCats);
 
-        // Find Healthy Combo category and fetch its products
-        const healthyComboCategory = sortedCats.find(cat =>
-          normalizeCategoryName(cat.name) === 'healthy combo'
+        // Find Healthy Combo category (category_id: 5)
+        const healthyComboCategory = sortedCats.find(cat => 
+          cat.id === 5 || normalizeCategoryName(cat.name) === 'healthy combo'
         );
+        
         if (healthyComboCategory) {
-          const healthyProducts = await getAllProducts(healthyComboCategory.id);
-          setHealthyComboProducts(healthyProducts.slice(0, 8)); // Limit to 8 products
+          try {
+            const response = await getAllProducts(healthyComboCategory.id);
+            
+            // Transform the response to match the expected ProductCard format
+            let healthyProducts = [];
+            
+            if (Array.isArray(response)) {
+              healthyProducts = response.map(transformProductData);
+            } else if (response && response.data && Array.isArray(response.data)) {
+              healthyProducts = response.data.map(transformProductData);
+            } else if (response && response.products && Array.isArray(response.products)) {
+              healthyProducts = response.products.map(transformProductData);
+            } else if (response && response.results && Array.isArray(response.results)) {
+              healthyProducts = response.results.map(transformProductData);
+            }
+            
+            setHealthyComboProducts(healthyProducts.slice(0, 8)); // Limit to 8 products
+          } catch (productError) {
+            console.error('Failed to fetch healthy combo products:', productError);
+            setHealthyComboProducts([]);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -490,7 +538,6 @@ const Home = () => {
         </div>
       </section>
 
-
       {/* ── Healthy Combos ── */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
@@ -509,15 +556,13 @@ const Home = () => {
             </motion.p>
           </motion.div>
 
-          {isLoadingCategories || healthyComboProducts.length > 0 ? (
+          {!isLoadingCategories && healthyComboProducts.length > 0 ? (
             <>
               {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-                {isLoadingCategories
-                  ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
-                  : healthyComboProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
+                {healthyComboProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
               </div>
 
               <div className="text-center mt-8 sm:mt-10">
@@ -532,7 +577,13 @@ const Home = () => {
                 </Button>
               </div>
             </>
-          ) : !isLoadingCategories && (
+          ) : isLoadingCategories ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+              {[...Array(4)].map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🥗</div>
               <h3 className="text-xl font-semibold text-neutral-700 mb-2">Coming Soon</h3>

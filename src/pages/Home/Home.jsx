@@ -12,7 +12,7 @@ import { getTopSellingProducts, getNewArrivalProducts, getProductCategories, get
 import IntroPopup from '../../components/common/Splash-Screen/Splash';
 
 // ─── WhatsApp config ──────────────────────────────────────────────────────────
-const WHATSAPP_NUMBER = '917738489220'; // replace with actual number (country code + number, no +)
+const WHATSAPP_NUMBER = '917738489220';
 const WHATSAPP_MESSAGE = encodeURIComponent("Hi! I'd like to know more about God's Garden products 🌿");
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
 
@@ -35,7 +35,6 @@ const WhatsAppButton = ({ className = '', size = 'md', label = 'Chat on WhatsApp
         transition-all duration-200 hover:scale-105 active:scale-95
         ${sizeClasses[size]} ${className}`}
     >
-      {/* WhatsApp SVG icon */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -178,7 +177,6 @@ const transformProductData = (product) => {
     unit: product.unit,
     category_id: product.category_id,
     description: product.description,
-    ...product // Keep any additional fields
   };
 };
 
@@ -221,7 +219,6 @@ const HeroCarousel = () => {
       onMouseEnter={pauseAutoplay}
       onMouseLeave={resumeAutoplay}
     >
-      {/* ── Slide images ── */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={slide.id}
@@ -232,53 +229,43 @@ const HeroCarousel = () => {
           exit="exit"
           className="absolute inset-0"
         >
-          <picture className="w-full h-auto">
+          <picture>
             <source media="(min-width: 768px)" srcSet={slide.desktopImage} />
             <img
               src={slide.mobileImage}
               alt={slide.alt}
-              className="w-full h-auto object-cover object-center"
+              className="w-full h-full object-cover object-center"
             />
           </picture>
           <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
-          {/* Extra bottom gradient on mobile so dots/text are legible */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
         </motion.div>
       </AnimatePresence>
-      <AnimatePresence className="z-10">
-        <div className="absolute left-0 right-0 bottom-10 flex items-center justify-center">
-          {/* CTA Buttons */}
-          <motion.div
-            custom={4}
-            variants={contentVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
+      
+      <div className="absolute left-0 right-0 bottom-10 flex items-center justify-center z-10">
+        <motion.div
+          custom={4}
+          variants={contentVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
+        >
+          <WhatsAppButton
+            label="Order on WhatsApp"
+            size="md"
+            className="shadow-2xl"
+          />
+          <Button
+            as={Link}
+            to="/shop"
+            className="flex items-center justify-center px-5 py-3 rounded-full border-2 bg-white font-medium text-sm sm:text-base transition-all duration-200 hover:bg-white/90"
           >
-            {/* Primary: WhatsApp Order */}
-            <WhatsAppButton
-              label="Order on WhatsApp"
-              size="md"
-              className="shadow-2xl"
-            />
+            <span className="text-black">Shop Now</span>
+            <FiArrowRight className="ml-2 w-4 h-4 text-black" />
+          </Button>
+        </motion.div>
+      </div>
 
-            {/* Secondary: Shop */}
-            <Button
-              as={Link}
-              to="/shop"
-              className="flex items-center justify-center
-                px-5 py-3 rounded-full
-                border-2 bg-white font-medium text-sm sm:text-base
-              transition-all duration-200 hover:text-white"
-            >
-              <p className="text-black">Shop Now</p>
-              <FiArrowRight className="ml-2 w-4 h-4 hover:text-white text-black" />
-            </Button>
-          </motion.div>
-        </div>
-      </AnimatePresence>
-
-      {/* ── Prev / Next arrows — hidden on small phones ── */}
       <button
         onClick={prev}
         aria-label="Previous slide"
@@ -305,7 +292,6 @@ const HeroCarousel = () => {
         <FiChevronRight className="w-5 h-5 md:w-6 md:h-6" />
       </button>
 
-      {/* ── Dot indicators ── */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
         {HERO_SLIDES.map((s, i) => (
           <button
@@ -321,7 +307,6 @@ const HeroCarousel = () => {
         ))}
       </div>
 
-      {/* ── Progress bar ── */}
       <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/20">
         <motion.div
           key={`progress-${activeIndex}`}
@@ -344,6 +329,30 @@ const Home = () => {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
+  // Fetch products for a specific category
+  const fetchProductsByCategory = useCallback(async (categoryId) => {
+    try {
+      const response = await getAllProducts(categoryId);
+      
+      // Handle different response structures
+      let products = [];
+      if (Array.isArray(response)) {
+        products = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        products = response.data;
+      } else if (response?.products && Array.isArray(response.products)) {
+        products = response.products;
+      } else if (response?.results && Array.isArray(response.results)) {
+        products = response.results;
+      }
+      
+      return products.map(transformProductData);
+    } catch (error) {
+      console.error(`Error fetching products for category ${categoryId}:`, error);
+      return [];
+    }
+  }, []);
+
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoadingProducts(true);
@@ -353,12 +362,10 @@ const Home = () => {
           getNewArrivalProducts(),
         ]);
         
-        // Transform top selling products
         const transformedTopSelling = Array.isArray(topSelling) 
           ? topSelling.map(transformProductData).slice(0, 8)
           : [];
         
-        // Transform new arrival products
         const transformedNewArrivals = Array.isArray(newArrivals)
           ? newArrivals.map(transformProductData).slice(0, 8)
           : [];
@@ -385,27 +392,12 @@ const Home = () => {
         );
         
         if (healthyComboCategory) {
-          try {
-            const response = await getAllProducts(healthyComboCategory.id);
-            
-            // Transform the response to match the expected ProductCard format
-            let healthyProducts = [];
-            
-            if (Array.isArray(response)) {
-              healthyProducts = response.map(transformProductData);
-            } else if (response && response.data && Array.isArray(response.data)) {
-              healthyProducts = response.data.map(transformProductData);
-            } else if (response && response.products && Array.isArray(response.products)) {
-              healthyProducts = response.products.map(transformProductData);
-            } else if (response && response.results && Array.isArray(response.results)) {
-              healthyProducts = response.results.map(transformProductData);
-            }
-            
-            setHealthyComboProducts(healthyProducts.slice(0, 8)); // Limit to 8 products
-          } catch (productError) {
-            console.error('Failed to fetch healthy combo products:', productError);
-            setHealthyComboProducts([]);
-          }
+          const healthyProducts = await fetchProductsByCategory(healthyComboCategory.id);
+          setHealthyComboProducts(healthyProducts.slice(0, 8));
+        } else {
+          // If no healthy combo category found, try with ID 5 directly
+          const healthyProducts = await fetchProductsByCategory(5);
+          setHealthyComboProducts(healthyProducts.slice(0, 8));
         }
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -416,7 +408,7 @@ const Home = () => {
 
     fetchProducts();
     fetchCategories();
-  }, []);
+  }, [fetchProductsByCategory]);
 
   const benefits = [
     {
@@ -458,10 +450,9 @@ const Home = () => {
         </script>
       </Helmet>
 
-      {/* ── Hero Carousel ── */}
       <HeroCarousel />
 
-      {/* ── Shop by Category ── */}
+      {/* Shop by Category */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
@@ -538,7 +529,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Healthy Combos ── */}
+      {/* Healthy Combos - Fixed to show only category 5 products */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
@@ -556,19 +547,23 @@ const Home = () => {
             </motion.p>
           </motion.div>
 
-          {!isLoadingCategories && healthyComboProducts.length > 0 ? (
+          {isLoadingCategories ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+              {[...Array(4)].map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : healthyComboProducts.length > 0 ? (
             <>
-              {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                 {healthyComboProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-
               <div className="text-center mt-8 sm:mt-10">
                 <Button
                   as={Link}
-                  to="/shop?category=healthy-combo"
+                  to="/shop?category=5"
                   variant="outline"
                   icon={<FiArrowRight />}
                   iconPosition="right"
@@ -577,12 +572,6 @@ const Home = () => {
                 </Button>
               </div>
             </>
-          ) : isLoadingCategories ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-              {[...Array(4)].map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
-            </div>
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🥗</div>
@@ -593,7 +582,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── New Arrivals ── */}
+      {/* New Arrivals - Separate section */}
       <section className="py-10 sm:py-14 md:py-16 bg-white">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
@@ -611,13 +600,12 @@ const Home = () => {
             </motion.p>
           </motion.div>
 
-          {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {isLoadingProducts
               ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
               : newArrivalProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+                  <ProductCard key={product.id} product={product} />
+                ))}
           </div>
 
           {newArrivalProducts.length > 0 && (
@@ -636,9 +624,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── CTA Section — WhatsApp-focused ── */}
+      {/* CTA Section */}
       <section className="py-12 sm:py-16 bg-green-700 text-white relative overflow-hidden">
-        {/* Decorative circles */}
         <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute -bottom-16 -left-10 w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
 
@@ -656,14 +643,11 @@ const Home = () => {
               Join thousands of happy customers who trust Gods Garden. Order directly or ask us anything — we're just a message away!
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-              {/* Primary: WhatsApp */}
               <WhatsAppButton
                 label="Chat &amp; Order on WhatsApp"
                 size="lg"
                 className="w-full sm:w-auto"
               />
-
-              {/* Secondary: Browse */}
               <Link
                 to="/shop"
                 className="inline-flex items-center justify-center gap-2
@@ -680,7 +664,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Benefits Section ── */}
+      {/* Benefits Section */}
       <section className="py-10 sm:py-14 md:py-16 bg-white">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
@@ -721,7 +705,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Floating WhatsApp FAB ── */}
       <WhatsAppFAB />
     </>
   );

@@ -179,9 +179,9 @@ const Orders = () => {
                                         className="flex flex-col items-center text-center w-20"
                                       >
                                         <div
-                                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center bg-white z-10 transition-all duration-300 ${isCompleted
-                                              ? "border-primary-500 bg-primary-500"
-                                              : "border-neutral-300"
+                                          className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-300 ${isCompleted
+                                              ? "bg-green-500"
+                                              : "bg-neutral-200"
                                             }`}
                                         >
                                           {isCompleted && (
@@ -191,8 +191,8 @@ const Orders = () => {
 
                                         <span
                                           className={`mt-2 text-[11px] font-medium ${isCompleted
-                                              ? "text-primary-600"
-                                              : "text-neutral-400"
+                                            ? "text-primary-600"
+                                            : "text-neutral-400"
                                             }`}
                                         >
                                           {step.label}

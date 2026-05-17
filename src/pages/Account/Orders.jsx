@@ -28,13 +28,13 @@ const Orders = () => {
         setIsLoading(false);
         return;
       }
-      
+
       // Wait for user object to be populated from AuthContext
-      if (!user) return; 
+      if (!user) return;
 
       // Check common variations of the ID field in case the structure differs
       const userId = user.id || user.user_id || user.pk || user.uid;
-      
+
       if (!userId) {
         console.error('[Orders] User ID not found in user object:', user);
         setIsLoading(false);
@@ -124,21 +124,27 @@ const Orders = () => {
 
                         <div className="flex items-center gap-2 text-neutral-500 text-sm">
                           <FiClock className="w-4 h-4 text-primary-500" />
-                          <span>Ordered on {new Date(order.created).toLocaleDateString('en-IN', { 
-                            day: 'numeric', 
-                            month: 'long', 
-                            year: 'numeric' 
+                          <span>Ordered on {new Date(order.created).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
                           })}</span>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">
-                          <FaTruck className="w-4 h-4 text-primary-500"/>
+                          <FiPackage className="w-4 h-4 text-primary-500" />
+                          <p className='text-neutral-500'>Order Status <span className="font-bold text-primary-500">{order.order_status || "Processing"}</span></p>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <FaTruck className="w-4 h-4 text-primary-500" />
                           <p className='text-neutral-500'>Order will be Delivered in <span className="font-bold text-primary-500">4 - 7 Days</span></p>
                         </div>
+
                       </div>
 
                       <div className="mt-4 pt-4 border-t border-neutral-50 flex justify-end">
-                        <Link 
+                        <Link
                           to={`/account/orders/${order.order_id}`}
                           className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline"
                         >

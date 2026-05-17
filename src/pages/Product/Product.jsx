@@ -457,7 +457,6 @@ const Product = () => {
                               ))}
                             </div>
                           </div>
-                          <span className="text-sm text-neutral-500">Product #{review.product_id}</span>
                         </div>
                         <p className="text-neutral-600 mt-4">{review.review}</p>
                         {review.images?.length > 0 && (

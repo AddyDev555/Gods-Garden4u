@@ -126,8 +126,146 @@ const OrderDetail = () => {
               <div className="bg-white rounded-3xl p-6 shadow-soft border border-neutral-100">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary-600">Order Status</p>
-                    <p className="mt-2 text-xl font-semibold text-neutral-900">{status}</p>
+                    {(() => {
+                      const orderSteps = [
+                        { key: "order-received", label: "Order Received" },
+                        { key: "order-packed", label: "Order Packed" },
+                        { key: "order-shipped", label: "Order Shipped" },
+                        { key: "order-delivered", label: "Order Delivered" },
+                      ];
+
+                      const currentStepIndex = orderSteps.findIndex(
+                        (step) => step.key === order?.order_status
+                      );
+
+                      return (
+                        <div className="w-full">
+                          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary-600 mb-5">
+                            Order Status
+                          </p>
+
+                          {/* Desktop Progress */}
+                          <div className="hidden md:block">
+                            <div className="relative">
+                              {/* Background Line */}
+                              <div className="absolute top-5 left-0 w-full h-1 bg-neutral-200 rounded-full" />
+
+                              {/* Active Line */}
+                              <div
+                                className={`absolute top-5 left-0 h-1 rounded-full transition-all duration-700 ${currentStepIndex === orderSteps.length - 1
+                                    ? "bg-green-500"
+                                    : "bg-primary-500"
+                                  }`}
+                                style={{
+                                  width: `${(currentStepIndex / (orderSteps.length - 1)) * 100}%`,
+                                }}
+                              />
+
+                              {/* Steps */}
+                              <div className="relative flex justify-between">
+                                {orderSteps.map((step, index) => {
+                                  const isCompleted = index <= currentStepIndex;
+                                  const isCurrent = index === currentStepIndex;
+
+                                  return (
+                                    <div
+                                      key={step.key}
+                                      className="flex flex-col items-center text-center"
+                                    >
+                                      <div
+                                        className={`w-10 h-10 rounded-full border-4 flex items-center justify-center bg-white z-10 transition-all duration-300 ${isCompleted
+                                            ? currentStepIndex === orderSteps.length - 1
+                                              ? "border-green-500 bg-green-500"
+                                              : "border-primary-500 bg-primary-500"
+                                            : "border-neutral-300"
+                                          }`}
+                                      >
+                                        {isCompleted ? (
+                                          <div className="w-3 h-3 rounded-full bg-white" />
+                                        ) : (
+                                          <div className="w-2 h-2 rounded-full bg-neutral-300" />
+                                        )}
+                                      </div>
+
+                                      <div className="mt-3">
+                                        <p
+                                          className={`text-sm font-semibold ${isCompleted
+                                              ? currentStepIndex === orderSteps.length - 1
+                                                ? "text-green-600"
+                                                : "text-primary-600"
+                                              : "text-neutral-400"
+                                            }`}
+                                        >
+                                          {step.label}
+                                        </p>
+
+                                        {isCurrent && (
+                                          <p className="text-xs text-neutral-500 mt-1">
+                                            Current Status
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Mobile Timeline */}
+                          <div className="md:hidden space-y-4">
+                            {orderSteps.map((step, index) => {
+                              const isCompleted = index <= currentStepIndex;
+
+                              return (
+                                <div key={step.key} className="flex items-start gap-3">
+                                  <div className="flex flex-col items-center">
+                                    <div
+                                      className={`w-5 h-5 rounded-full ${isCompleted
+                                          ? currentStepIndex === orderSteps.length - 1
+                                            ? "bg-green-500"
+                                            : "bg-primary-500"
+                                          : "bg-neutral-300"
+                                        }`}
+                                    />
+
+                                    {index !== orderSteps.length - 1 && (
+                                      <div
+                                        className={`w-1 h-10 ${index < currentStepIndex
+                                            ? currentStepIndex === orderSteps.length - 1
+                                              ? "bg-green-500"
+                                              : "bg-primary-500"
+                                            : "bg-neutral-200"
+                                          }`}
+                                      />
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <p
+                                      className={`font-medium ${isCompleted
+                                          ? currentStepIndex === orderSteps.length - 1
+                                            ? "text-green-600"
+                                            : "text-primary-600"
+                                          : "text-neutral-400"
+                                        }`}
+                                    >
+                                      {step.label}
+                                    </p>
+
+                                    {index === currentStepIndex && (
+                                      <p className="text-xs text-neutral-500 mt-1">
+                                        Current Status
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="rounded-3xl bg-primary-50 px-4 py-3 text-sm font-semibold text-primary-700 inline-flex items-center gap-2">
                     <FiPackage className="w-4 h-4" />

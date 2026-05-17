@@ -131,10 +131,80 @@ const Orders = () => {
                           })}</span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm">
-                          <FiPackage className="w-4 h-4 text-primary-500" />
-                          <p className='text-neutral-500'>Order Status <span className="font-bold text-primary-500">{order.order_status || "Processing"}</span></p>
-                        </div>
+                        {(() => {
+                          const orderSteps = [
+                            { key: "order-received", label: "Received" },
+                            { key: "order-packed", label: "Packed" },
+                            { key: "order-shipped", label: "Shipped" },
+                            { key: "order-delivered", label: "Delivered" },
+                          ];
+
+                          const currentStepIndex = orderSteps.findIndex(
+                            (step) => step.key === order.order_status
+                          );
+
+                          return (
+                            <div className="pt-2">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <FiPackage className="w-4 h-4 text-primary-500" />
+                                  <p className="text-sm text-neutral-500">
+                                    Order Status
+                                  </p>
+                                </div>
+
+                                <span className="text-xs font-bold text-primary-600 uppercase tracking-wide">
+                                  {orderSteps[currentStepIndex]?.label || "Received"}
+                                </span>
+                              </div>
+
+                              {/* Progress Bar */}
+                              <div className="relative">
+                                <div className="absolute top-2 left-0 w-full h-1 bg-neutral-200 rounded-full" />
+
+                                <div
+                                  className="absolute top-2 left-0 h-1 bg-primary-500 rounded-full transition-all duration-500"
+                                  style={{
+                                    width: `${(currentStepIndex / (orderSteps.length - 1)) * 100}%`,
+                                  }}
+                                />
+
+                                <div className="relative flex justify-between">
+                                  {orderSteps.map((step, index) => {
+                                    const isCompleted = index <= currentStepIndex;
+
+                                    return (
+                                      <div
+                                        key={step.key}
+                                        className="flex flex-col items-center text-center w-20"
+                                      >
+                                        <div
+                                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center bg-white z-10 transition-all duration-300 ${isCompleted
+                                              ? "border-primary-500 bg-primary-500"
+                                              : "border-neutral-300"
+                                            }`}
+                                        >
+                                          {isCompleted && (
+                                            <div className="w-2 h-2 rounded-full bg-white" />
+                                          )}
+                                        </div>
+
+                                        <span
+                                          className={`mt-2 text-[11px] font-medium ${isCompleted
+                                              ? "text-primary-600"
+                                              : "text-neutral-400"
+                                            }`}
+                                        >
+                                          {step.label}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         <div className="flex items-center gap-2 text-sm">
                           <FaTruck className="w-4 h-4 text-primary-500" />

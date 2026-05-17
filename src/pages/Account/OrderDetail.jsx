@@ -173,7 +173,7 @@ const OrderDetail = () => {
                                       className="flex flex-col items-center text-center"
                                     >
                                       <div
-                                        className={`w-10 h-10 rounded-full border-4 flex items-center justify-center bg-white z-10 transition-all duration-300 ${isCompleted
+                                        className={`w-7 h-7 rounded-full border-4 flex items-center justify-center bg-white z-10 transition-all duration-300 ${isCompleted
                                             ? currentStepIndex === orderSteps.length - 1
                                               ? "border-green-500 bg-green-500"
                                               : "border-primary-500 bg-primary-500"
@@ -231,7 +231,7 @@ const OrderDetail = () => {
 
                                     {index !== orderSteps.length - 1 && (
                                       <div
-                                        className={`w-1 h-10 ${index < currentStepIndex
+                                        className={`w-7 h-7 ${index < currentStepIndex
                                             ? currentStepIndex === orderSteps.length - 1
                                               ? "bg-green-500"
                                               : "bg-primary-500"

@@ -133,10 +133,10 @@ const Orders = () => {
 
                         {(() => {
                           const orderSteps = [
-                            { key: "order-received", label: "Received" },
-                            { key: "order-packed", label: "Packed" },
-                            { key: "order-shipped", label: "Shipped" },
-                            { key: "order-delivered", label: "Delivered" },
+                            { key: "order-received", label: "Order Received" },
+                            { key: "order-packed", label: "Order Packed" },
+                            { key: "order-shipped", label: "Order Shipped" },
+                            { key: "order-delivered", label: "Order Delivered" },
                           ];
 
                           const currentStepIndex = orderSteps.findIndex(
@@ -179,7 +179,7 @@ const Orders = () => {
                                         className="flex flex-col items-center text-center w-20"
                                       >
                                         <div
-                                          className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-300 ${isCompleted
+                                          className={`w-7 h-7 rounded-full flex items-center justify-center z-10 transition-all duration-300 ${isCompleted
                                               ? "bg-green-500"
                                               : "bg-neutral-200"
                                             }`}

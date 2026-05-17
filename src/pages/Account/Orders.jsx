@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiPackage, FiChevronRight, FiClock } from 'react-icons/fi';
+import { FaTruck } from "react-icons/fa";
 import { SITE_NAME } from '../../utils/constants';
 import Button from '../../components/common/Button/Button';
 import { useAuth } from '../../context/AuthContext';
@@ -128,6 +129,11 @@ const Orders = () => {
                             month: 'long', 
                             year: 'numeric' 
                           })}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <FaTruck className="w-4 h-4 text-primary-500"/>
+                          <p>Order will be Delivered in <span className="font-bold text-primary-500">4 - 7 Days</span></p>
                         </div>
                       </div>
 

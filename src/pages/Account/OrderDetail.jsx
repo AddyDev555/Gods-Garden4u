@@ -128,10 +128,10 @@ const OrderDetail = () => {
                   <div>
                     {(() => {
                       const orderSteps = [
-                        { key: "order-received", label: "Order Received" },
-                        { key: "order-packed", label: "Order Packed" },
-                        { key: "order-shipped", label: "Order Shipped" },
-                        { key: "order-delivered", label: "Order Delivered" },
+                        { key: "order-received", label: "Received" },
+                        { key: "order-packed", label: "Packed" },
+                        { key: "order-shipped", label: "Shipped" },
+                        { key: "order-delivered", label: "Delivered" },
                       ];
 
                       const currentStepIndex = orderSteps.findIndex(

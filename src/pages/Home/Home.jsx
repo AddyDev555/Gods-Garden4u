@@ -253,10 +253,10 @@ const HeroCarousel = () => {
               className="flex items-center justify-center
                 px-5 py-3 rounded-full
                 border-2 bg-white font-medium text-sm sm:text-base
-              transition-all duration-200 hover:text-white text-black"
+              transition-all duration-200 hover:text-white"
             >
-              <p>Shop Now</p>
-              <FiArrowRight className="ml-2 w-4 h-4" />
+              <p className="text-black">Shop Now</p>
+              <FiArrowRight className="ml-2 w-4 h-4 text-black" />
             </Button>
           </motion.div>
         </div>

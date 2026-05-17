@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { FiHeart, FiMinus, FiPlus, FiShoppingCart, FiZoomIn } from 'react-icons/fi';
+import { FiHeart, FiMinus, FiPlus, FiShoppingCart, FiZoomIn, FiStar } from 'react-icons/fi';
 import api from '../../api/gods-garden/axiosConfig';
-import { getProductReviews } from '../../api/gods-garden/productApi';
+import { getProductReviews, createProductReview } from '../../api/gods-garden/productApi';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useShop } from '../../context/ShopContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -16,6 +16,8 @@ import { calculateDiscount } from '../../utils/currency';
 import { getProductSchema, getBreadcrumbSchema, serializeSchema } from '../../utils/structuredData';
 import { ProductDetailSkeleton } from '../../components/common/Skeleton/Skeleton';
 import Button from '../../components/common/Button/Button';
+import Modal from '../../components/common/Modal/Modal';
+import Input, { Textarea } from '../../components/common/Input/Input';
 import { BestSellerBadge, NewBadge, OrganicBadge } from '../../components/common/Badge/Badge';
 import ImageLightbox from '../../components/common/ImageLightbox/ImageLightbox';
 
@@ -38,6 +40,12 @@ const Product = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewerName, setReviewerName] = useState('');
+  const [reviewDescription, setReviewDescription] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -88,6 +96,43 @@ const Product = () => {
 
     fetchReviews();
   }, [product?.id]);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewerName.trim()) {
+      toast.error('Please enter your name.');
+      return;
+    }
+    if (!reviewDescription.trim()) {
+      toast.error('Please enter your review.');
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    try {
+      const payload = {
+        product_pk: id,
+        reviewer_name: reviewerName.trim(),
+        rating: reviewRating,
+        review: reviewDescription.trim(),
+      };
+
+      await createProductReview(payload);
+      toast.success('Review submitted successfully');
+      setIsReviewModalOpen(false);
+      setReviewerName('');
+      setReviewDescription('');
+      setReviewRating(5);
+      // Refresh reviews
+      const result = await getProductReviews(id);
+      setReviews(Array.isArray(result) ? result : result?.data || []);
+    } catch (error) {
+      console.error('Failed to add review:', error);
+      toast.error('Failed to submit review.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -360,25 +405,35 @@ const Product = () => {
                 >
                   Add to Cart
                 </Button>
-                <button
-                  onClick={async () => {
-                    const result = await toggleWishlist(id);
-                    if (result.success) {
-                      toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
-                    } else {
-                      toast.error(result.error || 'Failed to update wishlist');
-                    }
-                  }}
-                  className={cn(
-                    'w-14 h-14 rounded-xl border flex items-center justify-center',
-                    'transition-all',
-                    isWishlisted
-                      ? 'border-error-500 bg-error-50 text-error-500'
-                      : 'border-neutral-200 hover:border-neutral-300'
-                  )}
-                >
-                  <FiHeart className={cn('w-5 h-5', isWishlisted && 'fill-current')} />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      const result = await toggleWishlist(id);
+                      if (result.success) {
+                        toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+                      } else {
+                        toast.error(result.error || 'Failed to update wishlist');
+                      }
+                    }}
+                    className={cn(
+                      'w-14 h-14 rounded-xl border flex items-center justify-center',
+                      'transition-all',
+                      isWishlisted
+                        ? 'border-error-500 bg-error-50 text-error-500'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    )}
+                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                  >
+                    <FiHeart className={cn('w-5 h-5', isWishlisted && 'fill-current')} />
+                  </button>
+                  <button
+                    onClick={() => setIsReviewModalOpen(true)}
+                    className="w-14 h-14 rounded-xl border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 transition-all text-yellow-500"
+                    aria-label="Write a Review"
+                  >
+                    <FiStar className="w-5 h-5 fill-current" />
+                  </button>
+                </div>
               </div>
 
               <Button
@@ -490,6 +545,65 @@ const Product = () => {
         onIndexChange={setActiveImage}
         alt={product_name}
       />
+
+      {/* Review Modal */}
+      <Modal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        title="Write a Review"
+        size="lg"
+      >
+        <form onSubmit={handleReviewSubmit} className="space-y-4">
+          <div className="grid gap-4">
+            <Input
+              label="Your Name"
+              value={reviewerName}
+              onChange={(e) => setReviewerName(e.target.value)}
+              placeholder="Enter your name"
+              required
+            />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-neutral-700">Rating</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    className={cn(
+                      'rounded-full p-2 transition-colors',
+                      star <= reviewRating
+                        ? 'bg-yellow-100 text-yellow-500'
+                        : 'bg-neutral-100 text-neutral-400 hover:text-yellow-500'
+                    )}
+                    aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                  >
+                    <FiStar className="w-5 h-5" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <Textarea
+            label="Review"
+            value={reviewDescription}
+            onChange={(e) => setReviewDescription(e.target.value)}
+            placeholder="Share your thoughts about the product"
+            rows={5}
+            required
+          />
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" onClick={() => setIsReviewModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmittingReview} loading={isSubmittingReview}>
+              Submit Review
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </>
   );
 };

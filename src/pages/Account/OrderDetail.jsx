@@ -84,7 +84,7 @@ const OrderDetail = () => {
   }, [rawOrderDetails]);
 
   const itemCount = orderItems.length;
-  const status = order?.payment_status || order?.status || 'Processing';
+  const status = order?.order_status || 'Processing';
   const shippingAddress = order?.delivery_address || order?.shipping_address || order?.address || '';
   const contactNumber = order?.mobile_number || order?.phone || order?.contact_number || '';
   const subtotal = order?.total_amount;

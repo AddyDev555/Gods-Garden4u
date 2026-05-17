@@ -133,7 +133,7 @@ const Orders = () => {
 
                         <div className="flex items-center gap-2 text-sm">
                           <FaTruck className="w-4 h-4 text-primary-500"/>
-                          <p>Order will be Delivered in <span className="font-bold text-primary-500">4 - 7 Days</span></p>
+                          <p className='text-neutral-500'>Order will be Delivered in <span className="font-bold text-primary-500">4 - 7 Days</span></p>
                         </div>
                       </div>
 

@@ -220,7 +220,7 @@ const OrderDetail = () => {
                 <div className="space-y-3 text-sm text-neutral-600">
                   <div className="flex justify-between"><span>Order ID</span><span className="font-medium text-neutral-900">#{id}</span></div>
                   <div className="flex justify-between"><span>Placed on</span><span>{createdAt ? formatDate(createdAt) : '—'}</span></div>
-                  <div className="flex justify-between"><span>Delivered in</span><span className="font-medium text-neutral-900">4 - 7 Days</span></div>
+                  <div className="flex justify-between"><span>Delivered in</span><span>4 - 7 Days</span></div>
                   <div className="flex justify-between"><span>Status</span><span className="font-medium text-neutral-900">{status}</span></div>
                   {order?.payment_method && (
                     <div className="flex justify-between"><span>Payment</span><span className="font-medium text-neutral-900">{order.payment_method}</span></div>

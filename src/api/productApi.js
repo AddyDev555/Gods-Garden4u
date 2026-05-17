@@ -52,21 +52,6 @@ export const getNewArrivalProducts = async (useCache = true) => {
 };
 
 /**
- * Get products by IDs (for wishlist)
- * @param {Array<number>} productIds - Array of product IDs
- * @returns {Promise<Array>} Array of product details
- */
-export const getProductsByIds = async (productIds) => {
-  if (!productIds || productIds.length === 0) {
-    return [];
-  }
-  const response = await api.post('/get-products-by-ids/', {
-    product_ids: productIds,
-  });
-  return response.data?.data || response.data || [];
-};
-
-/**
  * Get reviews for a product
  * @param {number|string} productPk - Product primary key
  * @returns {Promise<Array>} Array of reviews
@@ -142,6 +127,22 @@ export const getAllProducts = async (categoryPk = null) => {
   }
 
   return products;
+};
+
+/**
+ * Get products by IDs (filters from get-all-products; no dedicated backend endpoint)
+ * @param {Array<number|string>} productIds - Array of product IDs
+ * @returns {Promise<Array>} Array of product details
+ */
+export const getProductsByIds = async (productIds) => {
+  if (!productIds?.length) {
+    return [];
+  }
+
+  const idSet = new Set(productIds.map((id) => Number(id)));
+  const products = await getAllProducts();
+
+  return products.filter((product) => idSet.has(Number(product.id)));
 };
 
 /**

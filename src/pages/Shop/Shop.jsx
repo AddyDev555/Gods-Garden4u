@@ -16,6 +16,7 @@ const CATEGORY_LABEL_MAP = {
   2: 'Fruits & Vegetable Powders',
   3: 'Fruits chips',
   4: 'Healthy Combo',
+  5: 'Healthy Combo',
 };
 
 // Desired order for categories
@@ -83,7 +84,7 @@ const Shop = () => {
     // Category filter
     if (selectedCategory) {
       const catId = Number(selectedCategory);
-      list = list.filter((p) => p.category_id === catId);
+      list = list.filter((p) => Number(p.category_id) === catId);
     }
 
     // Sort

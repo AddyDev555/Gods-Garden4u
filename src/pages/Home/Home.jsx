@@ -128,6 +128,8 @@ const contentVariants = {
   }),
 };
 
+const HEALTHY_COMBO_CATEGORY_ID = 5;
+
 const HOMEPAGE_CATEGORY_ORDER = [
   'fruits chips',
   'healthy combo',
@@ -331,12 +333,18 @@ const Home = () => {
     const fetchProducts = async () => {
       setIsLoadingProducts(true);
       try {
-        const [topSelling, newArrivals] = await Promise.all([
+        const [topSelling, newArrivals, healthyCombos] = await Promise.all([
           getTopSellingProducts(),
           getNewArrivalProducts(),
+          getAllProducts(HEALTHY_COMBO_CATEGORY_ID),
         ]);
         setTopSellingProducts(topSelling.slice(0, 8));
         setNewArrivalProducts(newArrivals.slice(0, 8));
+        setHealthyComboProducts(
+          healthyCombos
+            .filter((p) => Number(p.category_id) === HEALTHY_COMBO_CATEGORY_ID)
+            .slice(0, 8)
+        );
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {
@@ -350,15 +358,6 @@ const Home = () => {
         const cats = await getProductCategories();
         const sortedCats = sortCategoriesByHomepageOrder(cats);
         setCategories(sortedCats);
-
-        // Find Healthy Combo category and fetch its products
-        const healthyComboCategory = sortedCats.find(cat =>
-          normalizeCategoryName(cat.name) === 'healthy combo'
-        );
-        if (healthyComboCategory) {
-          const healthyProducts = await getAllProducts(healthyComboCategory.id);
-          setHealthyComboProducts(healthyProducts.slice(0, 8)); // Limit to 8 products
-        }
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       } finally {
@@ -509,11 +508,11 @@ const Home = () => {
             </motion.p>
           </motion.div>
 
-          {isLoadingCategories || healthyComboProducts.length > 0 ? (
+          {isLoadingProducts || healthyComboProducts.length > 0 ? (
             <>
               {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-                {isLoadingCategories
+                {isLoadingProducts
                   ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
                   : healthyComboProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
@@ -523,7 +522,7 @@ const Home = () => {
               <div className="text-center mt-8 sm:mt-10">
                 <Button
                   as={Link}
-                  to="/shop?category=healthy-combo"
+                  to={`/shop?category=${HEALTHY_COMBO_CATEGORY_ID}`}
                   variant="outline"
                   icon={<FiArrowRight />}
                   iconPosition="right"
@@ -532,7 +531,7 @@ const Home = () => {
                 </Button>
               </div>
             </>
-          ) : !isLoadingCategories && (
+          ) : !isLoadingProducts && (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🥗</div>
               <h3 className="text-xl font-semibold text-neutral-700 mb-2">Coming Soon</h3>

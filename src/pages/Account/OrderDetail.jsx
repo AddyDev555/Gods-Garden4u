@@ -189,7 +189,7 @@ const OrderDetail = () => {
 
                                       <div className="mt-3">
                                         <p
-                                          className={`text-sm font-semibold ${isCompleted
+                                          className={`text-xs ${isCompleted
                                               ? currentStepIndex === orderSteps.length - 1
                                                 ? "text-green-600"
                                                 : "text-primary-600"

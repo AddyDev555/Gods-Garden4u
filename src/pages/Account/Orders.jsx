@@ -179,7 +179,7 @@ const Orders = () => {
                                         className="flex flex-col items-center text-center w-20"
                                       >
                                         <div
-                                          className={`w-7 h-7 rounded-full flex items-center justify-center z-10 transition-all duration-300 ${isCompleted
+                                          className={`w-6 h-6 rounded-full flex items-center justify-center z-10 transition-all duration-300 ${isCompleted
                                               ? "bg-green-500"
                                               : "bg-neutral-200"
                                             }`}

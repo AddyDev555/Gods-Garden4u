@@ -530,6 +530,13 @@ const Product = () => {
                     ))}
                   </div>
                 )}
+                <button
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="w-14 h-14 rounded-xl border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 transition-all text-yellow-500"
+                  aria-label="Write a Review"
+                >
+                  <p className="font-medium text-yellow-500">Add Review</p>
+                </button>
               </div>
             </div>
           </div>

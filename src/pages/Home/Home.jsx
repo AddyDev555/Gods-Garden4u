@@ -214,7 +214,19 @@ const HeroCarousel = () => {
           initial="enter"
           animate="center"
           exit="exit"
-          className="absolute inset-0"
+          className="absolute inset-0 touch-pan-y"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={1}
+          onDragEnd={(e, { offset, velocity }) => {
+            const swipe = Math.abs(offset.x) * velocity.x;
+
+            if (swipe < -10000) {
+              next();
+            } else if (swipe > 10000) {
+              prev();
+            }
+          }}
         >
           <picture className="w-full h-auto">
             <source media="(min-width: 768px)" srcSet={slide.desktopImage} />

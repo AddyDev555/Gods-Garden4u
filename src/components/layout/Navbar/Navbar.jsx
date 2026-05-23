@@ -195,7 +195,7 @@ const Navbar = () => {
               className="bg-white shadow-premium"
               onClick={(e) => e.stopPropagation()}
             >
-              <form onSubmit={handleSearch} className="container-custom py-4">
+              <form onSubmit={handleSearch} className="container-custom py-4 mt-10">
                 <div className="relative">
                   <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   <input

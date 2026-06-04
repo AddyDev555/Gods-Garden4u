@@ -29,10 +29,15 @@ export const ShopContextProvider = ({ children }) => {
       }
       setCartId(savedCartId);
 
-      // Try to load cached cart first
+      // Try to load cached cart first and refresh prices before rendering
       const cachedCart = sessionStore.get(`cache_cart_${savedCartId}`);
       if (cachedCart && Date.now() - cachedCart.timestamp < CACHE_DURATION.CART) {
-        setCartItems(cachedCart.data);
+        const cachedItems = await refreshCartPrices(cachedCart.data);
+        setCartItems(cachedItems);
+        sessionStore.set(`cache_cart_${savedCartId}`, {
+          data: cachedItems,
+          timestamp: Date.now(),
+        });
         setIsLoading(false);
         return;
       }
@@ -52,6 +57,34 @@ export const ShopContextProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const refreshCartPrices = useCallback(async (items) => {
+    if (!items || !items.length) return items;
+
+    const refreshed = await Promise.all(
+      items.map(async (item) => {
+        if (!item.id || !item.size) return item;
+
+        try {
+          const response = await api.get(
+            `/get-product-detail/?product_pk=${item.id}&size=${encodeURIComponent(item.size)}`
+          );
+          const productData = response.data?.data;
+          if (!productData) return item;
+
+          return {
+            ...item,
+            offer_price: productData.offer_price ?? item.offer_price,
+            mrp: productData.mrp ?? item.mrp,
+          };
+        } catch (err) {
+          return item;
+        }
+      })
+    );
+
+    return refreshed;
+  }, []);
+
   // Fetch cart items from server
   const fetchCartItems = useCallback(async (id = cartId, forceRefresh = false) => {
     if (!id) return;
@@ -60,7 +93,12 @@ export const ShopContextProvider = ({ children }) => {
     if (!forceRefresh) {
       const cachedCart = sessionStore.get(`cache_cart_${id}`);
       if (cachedCart && Date.now() - cachedCart.timestamp < CACHE_DURATION.CART) {
-        setCartItems(cachedCart.data);
+        const cachedItems = await refreshCartPrices(cachedCart.data);
+        setCartItems(cachedItems);
+        sessionStore.set(`cache_cart_${id}`, {
+          data: cachedItems,
+          timestamp: Date.now(),
+        });
         setIsLoading(false);
         return;
       }
@@ -80,7 +118,9 @@ export const ShopContextProvider = ({ children }) => {
         signal: abortControllerRef.current.signal,
       });
 
-      const items = response.data?.data || [];
+      let items = response.data?.data || [];
+      items = await refreshCartPrices(items);
+
       setCartItems(items);
       // Cache the result
       sessionStore.set(`cache_cart_${id}`, {
@@ -95,7 +135,7 @@ export const ShopContextProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [cartId]);
+  }, [cartId, refreshCartPrices]);
 
   // Debounced fetch
   const debouncedFetch = useMemo(

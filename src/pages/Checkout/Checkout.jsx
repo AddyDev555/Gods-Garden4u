@@ -114,6 +114,7 @@ const Checkout = () => {
       if (paymentMethod === 'cod') {
         // COD order created successfully
         clearCart();
+        setIsLoading(false);
         navigate('/checkout/success', { state: { orderId: response.data?.order_id } });
         return;
       }
@@ -133,20 +134,53 @@ const Checkout = () => {
         order_id: razorpayOrder.id,
         handler: async (paymentResponse) => {
           try {
-            await api.post('/verify-payment/', {
+            const verifyResponse = await api.post('/verify-payment/', {
               razorpay_order_id: paymentResponse.razorpay_order_id,
               razorpay_payment_id: paymentResponse.razorpay_payment_id,
               razorpay_signature: paymentResponse.razorpay_signature,
               amount: total * 100,
               cart_id: cartId,
               razorpay: true,
+              currency,
+              promo_code: '',
+              delivery_address: form.delivery_address,
+              name: form.name,
+              country_code: parseInt(form.country_code),
+              mobile_number: form.mobile_number,
+              pin_code: form.pin_code,
+              city: form.city,
+              state: form.state,
+              comment: form.comment,
             });
 
+            setIsLoading(false);
             clearCart();
-            navigate('/checkout/success', { state: { orderId: paymentResponse.razorpay_order_id } });
+            navigate('/checkout/success', {
+              state: {
+                orderId: verifyResponse.data?.data?.order_id || paymentResponse.razorpay_order_id,
+              },
+            });
           } catch (error) {
+            setIsLoading(false);
             toast.error('Payment verification failed');
           }
+        },
+        modal: {
+          ondismiss: async () => {
+            setIsLoading(false);
+            toast.info('Online payment was cancelled. No order has been placed.');
+
+            if (razorpayOrder?.id) {
+              try {
+                await api.post('/cancel-order/', {
+                  razorpay_order_id: razorpayOrder.id,
+                  cart_id: cartId,
+                });
+              } catch (cancelError) {
+                console.warn('Unable to cancel pending Razorpay order:', cancelError);
+              }
+            }
+          },
         },
         prefill: {
           name: form.name,
@@ -163,7 +197,6 @@ const Checkout = () => {
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error('Failed to process order. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };

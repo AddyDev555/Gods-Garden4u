@@ -39,7 +39,10 @@ const CheckoutSuccess = () => {
         });
 
         const orders = response.data?.data || [];
-        const foundOrder = orders.find((item) => item.order_id?.toString() === routeOrderId?.toString());
+        const foundOrder = orders.find((item) =>
+          item.order_id?.toString() === routeOrderId?.toString()
+          || item.transaction_id?.toString() === routeOrderId?.toString()
+        );
 
         if (foundOrder) {
           setOrder(foundOrder);
@@ -197,7 +200,7 @@ const CheckoutSuccess = () => {
             <Button as={Link} to="/shop" size="lg">
               Continue Shopping
             </Button>
-            <Button as={Link} to="/track-order" variant="outline" size="lg">
+            <Button as={Link} to="/account/orders" variant="outline" size="lg">
               Track Order
             </Button>
           </motion.div>

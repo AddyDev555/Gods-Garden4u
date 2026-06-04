@@ -36,6 +36,10 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
     id,
     product_name,
     main_image,
+    second_media,
+    third_media,
+    fourth_media,
+    fifth_media,
     offer_price,
     mrp,
     pricing,
@@ -45,6 +49,10 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
     quantity,
     size = [],
   } = product;
+
+  const baseImage = main_image || product.image || product.product_image || DEFAULT_PRODUCT_IMAGE;
+  const hoverImage = second_media || third_media || fourth_media || fifth_media || product.image || product.product_image;
+  const hasHoverImage = Boolean(hoverImage && hoverImage !== baseImage);
 
   // Get default size price
   const defaultSize = size?.[0] || 'M';
@@ -161,6 +169,8 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
       className={cn(
         'w-[86%] h-auto lg:w-[100%] lg:h-[100%] group relative bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300',
         className
@@ -266,13 +276,29 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
         </form>
       </Modal>
 
-      <Link to={productUrl} className="block relative overflow-hidden bg-neutral-100" style={{ aspectRatio: '1/1' }}>
-        <img
-          src={main_image || DEFAULT_PRODUCT_IMAGE}
-          alt={product_name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-        />
+      <Link to={productUrl} className="block relative overflow-hidden bg-neutral-100 group" style={{ aspectRatio: '1/1' }}>
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src={baseImage}
+            alt={product_name}
+            className={cn(
+              'absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out',
+              hasHoverImage ? 'group-hover:-translate-x-6 group-hover:scale-105' : 'group-hover:scale-105'
+            )}
+            loading="lazy"
+          />
+          <img
+            src={hasHoverImage ? hoverImage : baseImage}
+            alt={`${product_name} alternate view`}
+            className={cn(
+              'absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out',
+              hasHoverImage
+                ? 'opacity-0 translate-x-full group-hover:opacity-100 group-hover:translate-x-0 z-10'
+                : 'opacity-0'
+            )}
+            loading="lazy"
+          />
+        </div>
 
         {/* Quick Actions */}
         <div className="absolute top-3 right-3 flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

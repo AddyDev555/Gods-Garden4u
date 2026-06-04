@@ -6,7 +6,7 @@ export default function IntroPopup() {
     useEffect(() => {
         const timer = setTimeout(() => {
             setShow(false);
-        }, 2500); // duration (2.5 sec)
+        }, 1000); // duration (2.5 sec)
 
         return () => clearTimeout(timer);
     }, []);

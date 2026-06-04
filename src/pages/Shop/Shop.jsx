@@ -146,11 +146,10 @@ const Shop = () => {
       <li>
         <button
           onClick={() => handleCategoryChange(null)}
-          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-            !selectedCategory
+          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${!selectedCategory
               ? 'bg-primary-50 text-primary-600 font-medium'
               : 'text-neutral-600 hover:bg-neutral-50'
-          }`}
+            }`}
         >
           All Products
         </button>
@@ -169,11 +168,10 @@ const Shop = () => {
             <li key={category.id}>
               <button
                 onClick={() => handleCategoryChange(category.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                  isSelected
+                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isSelected
                     ? 'bg-primary-50 text-primary-600 font-medium'
                     : 'text-neutral-600 hover:bg-neutral-50'
-                }`}
+                  }`}
               >
                 {category.name}
               </button>

@@ -1,5 +1,5 @@
-import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Scroller from './components/common/Scroller';
 import Navbar from './components/layout/Navbar/Navbar';
 import Footer from './components/layout/Footer/Footer';
@@ -39,6 +39,12 @@ const TrackOrder = lazy(() => import(/* webpackChunkName: "static" */ './pages/T
 const NotFound = lazy(() => import(/* webpackChunkName: "notfound" */ './pages/NotFound/NotFound'));
 
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname]);
+
   return (
     <div className="flex flex-col min-h-screen pt-[96px] lg:pt-[112px]">
       {/* Promotional Scroller */}

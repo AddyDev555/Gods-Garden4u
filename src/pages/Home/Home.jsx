@@ -262,13 +262,13 @@ const HeroCarousel = () => {
             <Button
               as={Link}
               to="/shop"
-              className="flex items-center justify-center
+              className="group flex items-center justify-center
                 px-5 py-3 rounded-full
-                border-2 bg-white font-medium text-sm sm:text-base
-              transition-all duration-200 hover:text-white"
+                border-2 border-[#25D366] bg-white font-medium text-sm sm:text-base
+                !text-black transition-all duration-200 hover:bg-[#25D366] hover:!text-white"
             >
-              <p className="text-black">Shop Now</p>
-              <FiArrowRight className="ml-2 w-4 h-4 text-black" />
+              <span className="text-current">Shop Now</span>
+              <FiArrowRight className="ml-2 w-4 h-4 text-current transition-colors duration-200 group-hover:text-white" />
             </Button>
           </motion.div>
         </div>
@@ -428,9 +428,8 @@ const Home = () => {
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            initial="visible"
+            animate="visible"
             variants={stagger}
             className="text-center mb-8 sm:mb-12"
           >
@@ -443,9 +442,8 @@ const Home = () => {
           </motion.div>
 
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            initial="visible"
+            animate="visible"
             variants={stagger}
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
           >
@@ -502,6 +500,49 @@ const Home = () => {
       </section>
 
 
+      {/* ── New Arrivals ── */}
+      <section className="py-10 sm:py-14 md:py-16 bg-white">
+        <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-8 sm:mb-12"
+          >
+            <motion.h2 variants={fadeInUp} className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
+              New Arrivals
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto text-sm sm:text-base">
+              Fresh additions to our collection
+            </motion.p>
+          </motion.div>
+
+          {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            {isLoadingProducts
+              ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+              : newArrivalProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+          </div>
+
+          {newArrivalProducts.length > 0 && (
+            <div className="text-center mt-8 sm:mt-10">
+              <Button
+                as={Link}
+                to="/shop?filter=new"
+                variant="outline"
+                icon={<FiArrowRight />}
+                iconPosition="right"
+              >
+                View All New Arrivals
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ── Healthy Combos ── */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
@@ -548,49 +589,6 @@ const Home = () => {
               <div className="text-6xl mb-4">🥗</div>
               <h3 className="text-xl font-semibold text-neutral-700 mb-2">Coming Soon</h3>
               <p className="text-neutral-500">Exciting healthy combos are on the way!</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── New Arrivals ── */}
-      <section className="py-10 sm:py-14 md:py-16 bg-white">
-        <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="text-center mb-8 sm:mb-12"
-          >
-            <motion.h2 variants={fadeInUp} className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
-              New Arrivals
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto text-sm sm:text-base">
-              Fresh additions to our collection
-            </motion.p>
-          </motion.div>
-
-          {/* 2 cols on mobile, 3 on tablet, 4 on desktop */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-            {isLoadingProducts
-              ? [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
-              : newArrivalProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-          </div>
-
-          {newArrivalProducts.length > 0 && (
-            <div className="text-center mt-8 sm:mt-10">
-              <Button
-                as={Link}
-                to="/shop?filter=new"
-                variant="outline"
-                icon={<FiArrowRight />}
-                iconPosition="right"
-              >
-                View All New Arrivals
-              </Button>
             </div>
           )}
         </div>

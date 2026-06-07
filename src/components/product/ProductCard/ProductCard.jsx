@@ -172,7 +172,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
       whileHover={{ y: -6, scale: 1.01 }}
       transition={{ duration: 0.45, ease: 'easeOut' }}
       className={cn(
-        'w-[86%] h-auto lg:w-[100%] lg:h-[100%] group relative bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300',
+        'w-[90%] h-auto lg:w-[100%] lg:h-[100%] group relative bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300',
         className
       )}
     >

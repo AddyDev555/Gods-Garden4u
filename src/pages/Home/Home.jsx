@@ -8,7 +8,7 @@ import { getOrganizationSchema, getWebSiteSchema, serializeSchema } from '../../
 import Button from '../../components/common/Button/Button';
 import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
-import { getTopSellingProducts, getNewArrivalProducts, getProductCategories, getAllProducts } from '../../api/gods-garden/productApi';
+import { getProductCategories, getAllProducts } from '../../api/gods-garden/productApi';
 import IntroPopup from '../../components/common/Splash-Screen/Splash';
 
 // ─── WhatsApp config ──────────────────────────────────────────────────────────
@@ -345,18 +345,14 @@ const Home = () => {
     const fetchProducts = async () => {
       setIsLoadingProducts(true);
       try {
-        const [topSelling, newArrivals, healthyCombos] = await Promise.all([
-          getTopSellingProducts(),
-          getNewArrivalProducts(),
-          getAllProducts(HEALTHY_COMBO_CATEGORY_ID),
-        ]);
+        const allProducts = await getAllProducts();
+        const topSelling = allProducts.filter((p) => p.top_selling);
+        const newArrivals = allProducts.filter((p) => p.new_arrival);
+        const healthyCombos = allProducts.filter((p) => Number(p.category_id) === HEALTHY_COMBO_CATEGORY_ID);
+
         setTopSellingProducts(topSelling.slice(0, 8));
         setNewArrivalProducts(newArrivals.slice(0, 8));
-        setHealthyComboProducts(
-          healthyCombos
-            .filter((p) => Number(p.category_id) === HEALTHY_COMBO_CATEGORY_ID)
-            .slice(0, 8)
-        );
+        setHealthyComboProducts(healthyCombos.slice(0, 8));
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {

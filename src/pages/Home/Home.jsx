@@ -31,7 +31,7 @@ const WhatsAppButton = ({ className = '', size = 'md', label = 'Chat on WhatsApp
       rel="noopener noreferrer"
       className={`inline-flex items-center justify-center font-semibold rounded-lg
         bg-[#25D366] hover:bg-[#20bd5a] active:bg-[#1aaa50]
-        shadow-lg hover:shadow-xl
+        shadow-lg hover:shadow-xl md:text-base text-xs
         transition-all duration-200 hover:scale-105 active:scale-95
         ${sizeClasses[size]} ${className}`}
     >
@@ -74,20 +74,20 @@ const WhatsAppFAB = () => (
 const HERO_SLIDES = [
   {
     id: 1,
-    desktopImage: '/images/hero/banner_1_desktop.jpg',
-    mobileImage: '/images/hero/banner_1_mobile.png',
+    desktopImage: '/images/hero/banner_1_desktop.jpeg',
+    mobileImage: '/images/hero/banner_1_mobile.jpeg',
     alt: "God's Garden – Mango King Chips Fresh and Natural",
   },
   {
     id: 2,
-    desktopImage: '/images/hero/banner_2_desktop.jpg',
-    mobileImage: '/images/hero/banner_2_mobile.png',
+    desktopImage: '/images/hero/banner_2_desktop.jpeg',
+    mobileImage: '/images/hero/banner_2_mobile.jpeg',
     alt: "God's Garden – Pure Organic Products",
   },
   {
     id: 3,
-    desktopImage: '/images/hero/banner_3_desktop.jpg',
-    mobileImage: '/images/hero/banner_3_mobile.png',
+    desktopImage: '/images/hero/banner_3_desktop.jpeg',
+    mobileImage: '/images/hero/banner_3_mobile.jpeg',
     alt: "God's Garden – Dehydrated Fruit Chips",
   },
 ];
@@ -201,7 +201,7 @@ const HeroCarousel = () => {
 
   return (
     <section
-      className="relative h-[60vh] sm:min-h-[60vh] md:min-h-[80vh] flex overflow-hidden"
+      className="relative h-[60vh] sm:min-h-[60vh] md:min-h-[100vh] flex overflow-hidden"
       onMouseEnter={pauseAutoplay}
       onMouseLeave={resumeAutoplay}
     >
@@ -242,7 +242,7 @@ const HeroCarousel = () => {
         </motion.div>
       </AnimatePresence>
       <AnimatePresence className="z-10">
-        <div className="absolute left-0 right-0 bottom-10 flex items-center justify-center">
+        <div className="absolute left-0 right-0 bottom-10 md:bottom-30 flex items-center justify-center flex-row md:flex-col">
           {/* CTA Buttons */}
           <motion.div
             custom={4}
@@ -263,8 +263,8 @@ const HeroCarousel = () => {
               as={Link}
               to="/shop"
               className="group flex items-center justify-center
-                px-5 py-3 rounded-full
-                border-2 border-[#25D366] bg-white font-medium text-sm sm:text-base
+                px-5 py-3 rounded-full text-xs
+                border-2 border-[#25D366] bg-white font-medium md:text-base
                 !text-black transition-all duration-200 hover:bg-[#25D366] hover:!text-white"
             >
               <span className="text-current">Shop Now</span>
@@ -497,7 +497,7 @@ const Home = () => {
 
 
       {/* ── New Arrivals ── */}
-      <section className="py-10 sm:py-14 md:py-16 bg-white">
+        <section className="py-10 sm:py-14 md:py-16 relative overflow-hidden">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
             initial="hidden"

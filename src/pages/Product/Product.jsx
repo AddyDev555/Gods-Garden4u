@@ -242,47 +242,134 @@ const Product = () => {
 
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Image Gallery - Amazon style */}
-            <div className="flex flex-col-reverse md:flex-row gap-4">
-              {/* Thumbnails - vertical on desktop, horizontal on mobile */}
-              {images.length > 1 && (
-                <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
-                  {images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImage(i)}
-                      className={cn(
-                        'flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all',
-                        'hover:scale-105 hover:border-primary-300',
-                        activeImage === i ? 'border-primary-500 ring-2 ring-primary-200' : 'border-neutral-200'
-                      )}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col-reverse md:flex-row gap-4">
+                {/* Thumbnails - vertical on desktop, horizontal on mobile */}
+                {images.length > 1 && (
+                  <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
+                    {images.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveImage(i)}
+                        className={cn(
+                          'flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all',
+                          'hover:scale-105 hover:border-primary-300',
+                          activeImage === i ? 'border-primary-500 ring-2 ring-primary-200' : 'border-neutral-200'
+                        )}
+                      >
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Main Image - clickable to open lightbox */}
+                <div className="flex-1 relative group">
+                  <motion.div
+                    key={activeImage}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="aspect-square rounded-2xl overflow-hidden bg-neutral-100 cursor-pointer"
+                    onClick={() => setLightboxOpen(true)}
+                  >
+                    <img
+                      src={images[activeImage]}
+                      alt={product_name}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    />
+                    {/* Zoom hint overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 p-3 rounded-full shadow-lg">
+                        <FiZoomIn className="w-6 h-6 text-neutral-700" />
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="mt-9 pt-2 border-t border-neutral-200">
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { icon: '✓', text: '100% Organic' },
+                    { icon: '🚚', text: 'Free Shipping over ₹499' },
+                    { icon: '↩️', text: 'Easy Returns' },
+                    { icon: '🔒', text: 'Secure Payment' },
+                  ].map((item) => (
+                    <div key={item.text} className="flex items-center gap-2 text-sm text-neutral-600">
+                      <span>{item.icon}</span>
+                      {item.text}
+                    </div>
                   ))}
                 </div>
-              )}
+              </div>
 
-              {/* Main Image - clickable to open lightbox */}
-              <div className="flex-1 relative group">
-                <motion.div
-                  key={activeImage}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="aspect-square rounded-2xl overflow-hidden bg-neutral-100 cursor-pointer"
-                  onClick={() => setLightboxOpen(true)}
-                >
-                  <img
-                    src={images[activeImage]}
-                    alt={product_name}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
-                  {/* Zoom hint overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 p-3 rounded-full shadow-lg">
-                      <FiZoomIn className="w-6 h-6 text-neutral-700" />
-                    </span>
+              {/* Customer Reviews */}
+              <div className="pt-2 border-t border-neutral-200">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+                  <div>
+                    <h2 className="font-semibold text-lg text-neutral-900">Customer Reviews</h2>
+                    <p className="text-sm text-neutral-500">
+                      {isLoadingReviews
+                        ? 'Loading reviews...'
+                        : `${reviews.length} review${reviews.length === 1 ? '' : 's'}`}
+                    </p>
                   </div>
-                </motion.div>
+                </div>
+
+                {isLoadingReviews ? (
+                  <div className="text-sm text-neutral-500">Loading reviews...</div>
+                ) : reviews.length === 0 ? (
+                  <div className="rounded-2xl border border-neutral-200 p-6 text-neutral-600">
+                    No reviews yet for this product.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="rounded-2xl border border-neutral-200 p-5">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div>
+                            <p className="font-medium text-neutral-900">{review.name || 'Customer'}</p>
+                            <div className="mt-2 flex items-center gap-1 text-yellow-400">
+                              {[...Array(5)].map((_, i) => (
+                                <svg
+                                  key={i}
+                                  className={cn(
+                                    'w-4 h-4',
+                                    i < Math.round(review.rating) ? 'fill-current' : 'text-neutral-200'
+                                  )}
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                </svg>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-neutral-600 mt-4">{review.review}</p>
+                        {review.images?.length > 0 && (
+                          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {review.images.map((img, index) => (
+                              <img
+                                key={index}
+                                src={img}
+                                alt={`Review ${index + 1}`}
+                                className="w-full h-24 object-cover rounded-xl border border-neutral-200"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="mt-2 w-full rounded-xl py-2 border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 transition-all text-yellow-500"
+                  aria-label="Write a Review"
+                >
+                  <p className="font-medium text-yellow-500">Add Review</p>
+                </button>
               </div>
             </div>
 
@@ -454,90 +541,6 @@ const Product = () => {
                 </div>
               )}
 
-              {/* Trust Badges */}
-              <div className="mt-8 pt-8 border-t border-neutral-200">
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { icon: '✓', text: '100% Organic' },
-                    { icon: '🚚', text: 'Free Shipping over ₹499' },
-                    { icon: '↩️', text: 'Easy Returns' },
-                    { icon: '🔒', text: 'Secure Payment' },
-                  ].map((item) => (
-                    <div key={item.text} className="flex items-center gap-2 text-sm text-neutral-600">
-                      <span>{item.icon}</span>
-                      {item.text}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Customer Reviews */}
-              <div className="mt-8 pt-8 border-t border-neutral-200">
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
-                  <div>
-                    <h2 className="font-semibold text-lg text-neutral-900">Customer Reviews</h2>
-                    <p className="text-sm text-neutral-500">
-                      {isLoadingReviews
-                        ? 'Loading reviews...'
-                        : `${reviews.length} review${reviews.length === 1 ? '' : 's'}`}
-                    </p>
-                  </div>
-                </div>
-
-                {isLoadingReviews ? (
-                  <div className="text-sm text-neutral-500">Loading reviews...</div>
-                ) : reviews.length === 0 ? (
-                  <div className="rounded-2xl border border-neutral-200 p-6 text-neutral-600">
-                    No reviews yet for this product.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="rounded-2xl border border-neutral-200 p-5">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div>
-                            <p className="font-medium text-neutral-900">{review.name || 'Customer'}</p>
-                            <div className="mt-2 flex items-center gap-1 text-yellow-400">
-                              {[...Array(5)].map((_, i) => (
-                                <svg
-                                  key={i}
-                                  className={cn(
-                                    'w-4 h-4',
-                                    i < Math.round(review.rating) ? 'fill-current' : 'text-neutral-200'
-                                  )}
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                </svg>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-neutral-600 mt-4">{review.review}</p>
-                        {review.images?.length > 0 && (
-                          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {review.images.map((img, index) => (
-                              <img
-                                key={index}
-                                src={img}
-                                alt={`Review ${index + 1}`}
-                                className="w-full h-24 object-cover rounded-xl border border-neutral-200"
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button
-                  onClick={() => setIsReviewModalOpen(true)}
-                  className="w-full rounded-xl py-2 border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 transition-all text-yellow-500"
-                  aria-label="Write a Review"
-                >
-                  <p className="font-medium text-yellow-500">Add Review</p>
-                </button>
-              </div>
             </div>
           </div>
         </div>

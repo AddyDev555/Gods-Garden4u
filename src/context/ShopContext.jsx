@@ -370,9 +370,22 @@ export const ShopContextProvider = ({ children }) => {
         no_of_products: itemCount,
       });
 
+      const discountAmount = Number(
+          response.data.amount ??
+          0
+      );
+      const discountPercentage = Number(
+        response.data.discount_percent ??
+          response.data.discount_percentage ??
+          response.data.percentage ??
+          (amount > 0 && discountAmount > 0 ? (discountAmount / amount) * 100 : 0)
+      );
+
       return {
         success: true,
-        discount: response.data.discount || 0,
+        discount: discountAmount,
+        discountAmount,
+        discountPercentage,
         data: response.data,
       };
     } catch (err) {

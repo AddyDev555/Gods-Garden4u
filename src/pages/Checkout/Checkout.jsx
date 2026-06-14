@@ -20,6 +20,9 @@ const Checkout = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoDiscountPercent, setPromoDiscountPercent] = useState(0);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -32,7 +35,22 @@ const Checkout = () => {
     comment: '',
   });
 
-  const checkoutSubtotal = cartTotals.subtotal;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedPromo = window.sessionStorage.getItem('cartPromo');
+      if (savedPromo) {
+        const parsedPromo = JSON.parse(savedPromo);
+        setPromoCode(parsedPromo.code || '');
+        setPromoDiscount(Number(parsedPromo.discount || 0));
+        setPromoDiscountPercent(Number(parsedPromo.percentage || 0));
+      }
+    } catch (err) {
+      console.warn('Unable to load promo state:', err);
+    }
+  }, []);
+
+  const checkoutSubtotal = Math.max(0, cartTotals.subtotal - promoDiscount);
 
   const deliveryCharge =
     checkoutSubtotal >= 499
@@ -95,7 +113,7 @@ const Checkout = () => {
       const orderData = {
         amount: total * 100, // Convert to paise
         currency: currency,
-        promo_code: '',
+        promo_code: promoCode,
         delivery_address: form.delivery_address,
         name: form.name,
         mobile_number: form.mobile_number,
@@ -142,7 +160,7 @@ const Checkout = () => {
               cart_id: cartId,
               razorpay: true,
               currency,
-              promo_code: '',
+              promo_code: promoCode,
               delivery_address: form.delivery_address,
               name: form.name,
               country_code: parseInt(form.country_code),
@@ -386,6 +404,12 @@ const Checkout = () => {
                       <span className="text-neutral-600">Subtotal</span>
                       <span>{formatPrice(checkoutSubtotal)}</span>
                     </div>
+                    {promoDiscount > 0 && (
+                      <div className="flex justify-between text-primary-600 text-sm">
+                        <span>Promo Discount{promoDiscountPercent > 0 ? ` (${Math.round(promoDiscountPercent)}% off)` : ''}</span>
+                        <span>-{formatPrice(promoDiscount)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Delivery Charges</span>
                       <span className={deliveryCharge === 0 ? 'text-green-600 font-medium' : ''}>

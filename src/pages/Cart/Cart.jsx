@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,9 +22,38 @@ const Cart = () => {
 
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoDiscountPercent, setPromoDiscountPercent] = useState(0);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
 
-  const total = cartTotals.subtotal - promoDiscount;
+  const persistPromoState = (code, discount, percentage) => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(
+        'cartPromo',
+        JSON.stringify({ code: code || '', discount: Number(discount || 0), percentage: Number(percentage || 0) })
+      );
+    } catch (err) {
+      console.warn('Unable to persist promo state:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedPromo = window.sessionStorage.getItem('cartPromo');
+      if (savedPromo) {
+        const parsedPromo = JSON.parse(savedPromo);
+        setPromoCode(parsedPromo.code || '');
+        setPromoDiscount(Number(parsedPromo.discount || 0));
+        setPromoDiscountPercent(Number(parsedPromo.percentage || 0));
+      }
+    } catch (err) {
+      console.warn('Unable to load promo state:', err);
+    }
+  }, []);
+
+  const discountedSubtotal = Math.max(0, cartTotals.subtotal - promoDiscount);
+  const total = discountedSubtotal;
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -34,9 +63,24 @@ const Cart = () => {
     setIsValidatingPromo(false);
 
     if (result.success) {
-      setPromoDiscount(result.discount);
-      toast.success(`Promo applied! You saved ${formatPrice(result.discount)}`);
+      const discountAmount = Number(result.discountAmount || result.discount || 0);
+      const discountPercentage = Number(
+        result.discountPercentage ??
+          result.discount_percent ??
+          result.discount_percentages ??
+          (cartTotals.subtotal > 0 && discountAmount > 0 ? (discountAmount / cartTotals.subtotal) * 100 : 0)
+      );
+
+      setPromoDiscount(discountAmount);
+      setPromoDiscountPercent(discountPercentage);
+      persistPromoState(promoCode.trim(), discountAmount, discountPercentage);
+      toast.success(
+        `Promo applied! You saved ${formatPrice(discountAmount)}${discountPercentage > 0 ? ` (${Math.round(discountPercentage)}% off)` : ''}`
+      );
     } else {
+      setPromoDiscount(0);
+      setPromoDiscountPercent(0);
+      persistPromoState('', 0, 0);
       toast.error(result.error);
     }
   };
@@ -233,7 +277,7 @@ const Cart = () => {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Subtotal</span>
-                    <span className="font-medium">{formatPrice(cartTotals.subtotal)}</span>
+                    <span className="font-medium">{formatPrice(discountedSubtotal)}</span>
                   </div>
 
                   {cartTotals.savings > 0 && (
@@ -244,8 +288,8 @@ const Cart = () => {
                   )}
 
                   {promoDiscount > 0 && (
-                    <div className="flex justify-between text-primary-600">
-                      <span>Promo Discount</span>
+                    <div className="flex justify-between text-primary-600 text-sm">
+                      <span>Promo Discount{promoDiscountPercent > 0 ? ` (${Math.round(promoDiscountPercent)}% off)` : ''}</span>
                       <span>-{formatPrice(promoDiscount)}</span>
                     </div>
                   )}

@@ -287,6 +287,176 @@ const Product = () => {
                 </div>
               </div>
 
+              {/* Mobile Product Info */}
+              <div className="md:hidden">
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {top_selling && <BestSellerBadge />}
+                  {new_arrival && <NewBadge />}
+                  <OrganicBadge />
+                </div>
+
+                <h1 className="font-display text-2xl lg:text-3xl font-bold text-neutral-900 mb-4">
+                  {product_name}
+                </h1>
+
+                {/* Rating */}
+                {rating && (
+                  <div className="flex items-center gap-2 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        className={cn('w-5 h-5', i < parseInt(rating) ? 'text-accent-500 fill-current' : 'text-neutral-300')}
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                      </svg>
+                    ))}
+                    <span className="text-sm text-neutral-500">({rating}/5)</span>
+                  </div>
+                )}
+
+                {/* Price */}
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="text-3xl font-bold text-neutral-900">
+                    {formatPrice(displayPrice)}
+                  </span>
+                  {discount > 0 && (
+                    <>
+                      <span className="text-lg text-neutral-400 line-through">
+                        {formatPrice(displayMrp)}
+                      </span>
+                      <span className="text-sm font-medium text-primary-600 bg-primary-50 px-2 py-1 rounded">
+                        {discount}% OFF
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Size Selection */}
+                {size.length > 0 && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Size
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {size.map((s) => {
+                        const sPrice = pricing?.[s];
+                        const inStock = sPrice?.[2] > 0;
+                        return (
+                          <button
+                            key={s}
+                            onClick={() => setSelectedSize(s)}
+                            disabled={!inStock}
+                            className={cn(
+                              'px-4 py-2 rounded-lg border transition-all',
+                              selectedSize === s
+                                ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                : 'border-neutral-200 hover:border-neutral-300',
+                              !inStock && 'opacity-50 cursor-not-allowed line-through'
+                            )}
+                          >
+                            {SIZE_LABELS[s] || s}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Quantity
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center border border-neutral-200 rounded-lg">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-neutral-100"
+                      >
+                        <FiMinus className="w-4 h-4" />
+                      </button>
+                      <span className="w-12 text-center font-medium">{quantity}</span>
+                      <button
+                        onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-neutral-100"
+                      >
+                        <FiPlus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {stockQuantity > 0 && stockQuantity <= 10 && (
+                      <span className="text-sm text-accent-600">
+                        Only {stockQuantity} left!
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 mb-6">
+                  <Button
+                    onClick={handleAddToCart}
+                    disabled={stockQuantity < 1 || isUpdating}
+                    loading={isUpdating}
+                    icon={<FiShoppingCart />}
+                    className="flex-1"
+                    size="lg"
+                  >
+                    Add to Cart
+                  </Button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        const result = await toggleWishlist(id);
+                        if (result.success) {
+                          toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+                        } else {
+                          toast.error(result.error || 'Failed to update wishlist');
+                        }
+                      }}
+                      className={cn(
+                        'w-14 h-14 rounded-xl border flex items-center justify-center',
+                        'transition-all',
+                        isWishlisted
+                          ? 'border-error-500 bg-error-50 text-error-500'
+                          : 'border-neutral-200 hover:border-neutral-300'
+                      )}
+                      aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      <FiHeart className={cn('w-5 h-5', isWishlisted && 'fill-current')} />
+                    </button>
+                    <button
+                      onClick={() => setIsReviewModalOpen(true)}
+                      className="w-14 h-14 rounded-xl border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 transition-all text-yellow-500"
+                      aria-label="Write a Review"
+                    >
+                      <FiStar className="w-5 h-5 fill-current" />
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleBuyNow}
+                  variant="outline"
+                  disabled={stockQuantity < 1}
+                  fullWidth
+                  size="lg"
+                >
+                  Buy Now
+                </Button>
+
+                {/* Description */}
+                {description && (
+                  <div className="mt-8 pt-8 border-t border-neutral-200">
+                    <h2 className="font-semibold text-lg text-neutral-900 mb-4">Description</h2>
+                    <p className="text-neutral-600 leading-relaxed">{description}</p>
+                  </div>
+                )}
+
+              </div>
+
               {/* Trust Badges */}
               <div className="mt-9 pt-2 border-t border-neutral-200">
                 <div className="grid grid-cols-2 gap-4">
@@ -374,7 +544,7 @@ const Product = () => {
             </div>
 
             {/* Product Info */}
-            <div>
+            <div className="hidden lg:block">
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {top_selling && <BestSellerBadge />}

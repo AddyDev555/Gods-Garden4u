@@ -55,24 +55,53 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
   const hasHoverImage = Boolean(hoverImage && hoverImage !== baseImage);
 
   // Get default size price
-  const defaultSize = size?.[0] || 'M';
-  const sizePrice = pricing?.[defaultSize] || [mrp, offer_price, 100];
-  const displayMrp = sizePrice[0] || mrp;
-  const displayPrice = sizePrice[1] || offer_price;
+  const parsedSize = Array.isArray(size)
+    ? size
+    : typeof size === 'string' && size.trim()
+      ? size.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+  const parsedPricing = (() => {
+    if (!pricing) return null;
+    if (typeof pricing === 'object') return pricing;
+    try { return JSON.parse(pricing); } catch { return null; }
+  })();
+
+  // Get default size price  (replace the old 3 lines that used `size` and `pricing`)
+  const defaultSize = parsedSize[0] || null;
+  const sizePrice = defaultSize && parsedPricing?.[defaultSize]
+    ? parsedPricing[defaultSize]
+    : null;
+
+  const displayMrp = sizePrice?.[0] ?? mrp ?? 0;
+  const displayPrice = sizePrice?.[1] ?? offer_price ?? 0;
 
   const discount = calculateDiscount(displayMrp, displayPrice);
   const isWishlisted = typeof isWishlistedOverride === 'boolean' ? isWishlistedOverride : isInWishlist(id);
   const productUrl = `/product/${createSlug(product_name)}-${id}`;
-  const pricingHasStock = pricing && Object.values(pricing).some((p) => {
-    if (Array.isArray(p)) {
-      return Number(p[2] || 0) > 0;
-    }
+
+  const productQuantity = Number(
+    quantity ??
+    product.stock_quantity ??
+    product.available_quantity ??
+    product.qty ??
+    product.stockQuantity ??
+    product.availableQuantity ??
+    0
+  );
+
+  const pricingHasStock = parsedPricing && Object.values(parsedPricing).some((p) => {
+    if (Array.isArray(p)) return Number(p[2] ?? 0) > 0;
     if (p && typeof p === 'object') {
-      return Number(p.quantity || p.stock || p.available || 0) > 0;
+      return Number(
+        p.quantity ?? p.stock ?? p.available ?? p.qty ??
+        p.stock_quantity ?? p.available_quantity ?? 0
+      ) > 0;
     }
     return false;
   });
-  const isInStock = Number(quantity || 0) > 0 || pricingHasStock;
+
+  const isInStock = productQuantity > 0 || pricingHasStock;
 
   const handleAddToCart = async (e) => {
     e.preventDefault();

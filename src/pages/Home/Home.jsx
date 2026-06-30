@@ -16,6 +16,33 @@ const WHATSAPP_NUMBER = '917738489220'; // replace with actual number (country c
 const WHATSAPP_MESSAGE = encodeURIComponent("Hi! I'd like to know more about God's Garden products 🌿");
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
 
+const LeafDivider = ({ flip = false, className = '' }) => (
+  <div className={`mt-18 pointer-events-none select-none ${className}`} aria-hidden="true">
+    <svg
+      viewBox="0 0 1440 80"
+      preserveAspectRatio="none"
+      className={`w-full h-5 sm:h-14 ${flip ? 'rotate-180' : ''}`}
+    >
+      <path
+        d="M0 40 C 240 10, 360 70, 600 40 S 1000 10, 1200 45 S 1440 30, 1440 30"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="text-primary-300/70"
+      />
+      <path
+        d="M0 40 C 240 10, 360 70, 600 40 S 1000 10, 1200 45 S 1440 30, 1440 30"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="0.75"
+        strokeDasharray="2 6"
+        className="text-primary-500/60"
+        transform="translate(0, 6)"
+      />
+    </svg>
+  </div>
+);
+
 // ─── WhatsApp Button Component ────────────────────────────────────────────────
 const WhatsAppButton = ({ className = '', size = 'md', label = 'Chat on WhatsApp' }) => {
   const sizeClasses = {
@@ -116,15 +143,6 @@ const slideVariants = {
     x: direction > 0 ? '-100%' : '100%',
     opacity: 0,
     transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] },
-  }),
-};
-
-const contentVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.12, duration: 0.5, ease: 'easeOut' },
   }),
 };
 
@@ -240,38 +258,6 @@ const HeroCarousel = () => {
           {/* Extra bottom gradient on mobile so dots/text are legible */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
         </motion.div>
-      </AnimatePresence>
-      <AnimatePresence className="z-10">
-        <div className="absolute left-0 right-0 bottom-10 md:bottom-30 flex items-center justify-center flex-row md:flex-col">
-          {/* CTA Buttons */}
-          <motion.div
-            custom={4}
-            variants={contentVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3"
-          >
-            {/* Primary: WhatsApp Order */}
-            <WhatsAppButton
-              label="Order on WhatsApp"
-              size="md"
-              className="shadow-2xl"
-            />
-
-            {/* Secondary: Shop */}
-            <Button
-              as={Link}
-              to="/shop"
-              className="group flex items-center justify-center
-                px-5 py-3 rounded-full text-xs
-                border-2 border-[#25D366] bg-white font-medium md:text-base
-                !text-black transition-all duration-200 hover:bg-[#25D366] hover:!text-white"
-            >
-              <span className="text-current">Shop Now</span>
-              <FiArrowRight className="ml-2 w-4 h-4 text-current transition-colors duration-200 group-hover:text-white" />
-            </Button>
-          </motion.div>
-        </div>
       </AnimatePresence>
 
       {/* ── Prev / Next arrows — hidden on small phones ── */}
@@ -493,11 +479,13 @@ const Home = () => {
             )}
           </motion.div>
         </div>
+        <LeafDivider className="text-primary-200" />
       </section>
 
 
+
       {/* ── New Arrivals ── */}
-        <section className="py-10 sm:py-14 md:py-16 relative overflow-hidden">
+      <section className="py-10 sm:py-5 md:py-5 relative overflow-hidden">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           <motion.div
             initial="hidden"

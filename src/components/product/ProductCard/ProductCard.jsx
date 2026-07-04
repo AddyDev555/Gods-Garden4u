@@ -48,6 +48,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
     top_selling,
     quantity,
     size = [],
+    orders_booked = 0,
   } = product;
 
   const baseImage = main_image || product.image || product.product_image || DEFAULT_PRODUCT_IMAGE;
@@ -102,6 +103,11 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
   });
 
   const isInStock = productQuantity > 0 || pricingHasStock;
+
+  // Calculate display orders - show random number > 100 if orders_booked is 0
+  const displayOrders = orders_booked && orders_booked > 0 
+    ? orders_booked 
+    : Math.floor(Math.random() * 900) + 101; // Random number between 101 and 1000
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -401,6 +407,18 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
               </span>
             </>
           )}
+          {/* Rating */}
+        {rating && (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-semibold text-neutral-900">{rating}</span>
+              <FiStar className="w-4 h-4 text-accent-500 fill-current" />
+            </div>
+            <span className="text-xs text-neutral-600">
+              {displayOrders} {displayOrders === 1 ? 'order' : 'orders'}
+            </span>
+          </div>
+        )}
         </div>
 
         {/* Badges */}
@@ -408,24 +426,6 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
           {top_selling && <BestSellerBadge />}
           {new_arrival && <NewBadge />}
         </div>
-
-        {/* Rating */}
-        {rating && (
-          <div className="flex items-center gap-1 mb-3">
-            {[...Array(5)].map((_, i) => (
-              <svg
-                key={i}
-                className={cn(
-                  'w-4 h-4',
-                  i < parseInt(rating) ? 'text-accent-500 fill-current' : 'text-neutral-300'
-                )}
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-              </svg>
-            ))}
-          </div>
-        )}
 
         {/* Add to Cart Button */}
         <button

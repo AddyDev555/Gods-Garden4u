@@ -101,19 +101,19 @@ const WhatsAppFAB = () => (
 const HERO_SLIDES = [
   {
     id: 1,
-    desktopImage: '/images/hero/banner_1_desktop.jpeg',
+    desktopImage: '/images/hero/banner_1_desktop.png',
     mobileImage: '/images/hero/banner_1_mobile.jpeg',
     alt: "God's Garden – Mango King Chips Fresh and Natural",
   },
   {
     id: 2,
-    desktopImage: '/images/hero/banner_2_desktop.jpeg',
+    desktopImage: '/images/hero/banner_2_desktop.png',
     mobileImage: '/images/hero/banner_2_mobile.jpeg',
     alt: "God's Garden – Pure Organic Products",
   },
   {
     id: 3,
-    desktopImage: '/images/hero/banner_3_desktop.jpeg',
+    desktopImage: '/images/hero/banner_3_desktop.png',
     mobileImage: '/images/hero/banner_3_mobile.jpeg',
     alt: "God's Garden – Dehydrated Fruit Chips",
   },
@@ -219,7 +219,7 @@ const HeroCarousel = () => {
 
   return (
     <section
-      className="relative h-[60vh] sm:min-h-[60vh] md:min-h-[100vh] flex overflow-hidden"
+      className="relative h-[60vh] sm:min-h-[60vh] md:min-h-[74vh] flex overflow-hidden"
       onMouseEnter={pauseAutoplay}
       onMouseLeave={resumeAutoplay}
     >
@@ -232,7 +232,7 @@ const HeroCarousel = () => {
           initial="enter"
           animate="center"
           exit="exit"
-          className="absolute inset-0 touch-pan-y"
+          className="absolute top-3 inset-0 touch-pan-y"
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={1}
@@ -246,7 +246,7 @@ const HeroCarousel = () => {
             }
           }}
         >
-          <picture className="w-full h-auto">
+          <picture className="w-full">
             <source media="(min-width: 768px)" srcSet={slide.desktopImage} />
             <img
               src={slide.mobileImage}
@@ -254,9 +254,9 @@ const HeroCarousel = () => {
               className="w-full h-auto object-cover object-center"
             />
           </picture>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
+          {/* <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" /> */}
           {/* Extra bottom gradient on mobile so dots/text are legible */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
+          {/* <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" /> */}
         </motion.div>
       </AnimatePresence>
 

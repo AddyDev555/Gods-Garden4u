@@ -145,6 +145,26 @@ export const getProductsByIds = async (productIds) => {
   return products.filter((product) => idSet.has(Number(product.id)));
 };
 
+export const getProductImageById = async (productId) => {
+  if (!productId) return '';
+
+  try {
+    const products = await getAllProducts();
+    const product = products.find((item) => Number(item.id) === Number(productId));
+
+    return (
+      product?.main_image ||
+      product?.image ||
+      product?.product_image ||
+      product?.thumbnail ||
+      ''
+    );
+  } catch (error) {
+    console.error('Failed to fetch product image:', error);
+    return '';
+  }
+};
+
 /**
  * Get Instagram profile posts
  * @param {boolean} useCache - Whether to use cached data

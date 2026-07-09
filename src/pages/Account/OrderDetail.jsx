@@ -2,11 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { FiChevronLeft, FiClock, FiPackage, FiMapPin } from 'react-icons/fi';
-import { SITE_NAME } from '../../utils/constants';
+import { SITE_NAME, DEFAULT_PRODUCT_IMAGE } from '../../utils/constants';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import api from '../../api/gods-garden/axiosConfig';
-import { formatDate } from '../../utils/helpers';
+import { formatDate, getOrderItemImage } from '../../utils/helpers';
 import Button from '../../components/common/Button/Button';
 
 const OrderDetail = () => {
@@ -83,6 +83,8 @@ const OrderDetail = () => {
     return Array.isArray(rawOrderDetails) ? rawOrderDetails : [];
   }, [rawOrderDetails]);
 
+  const [itemImages, setItemImages] = useState({});
+
   const itemCount = orderItems.length;
   const status = order?.order_status || 'Processing';
   const shippingAddress = order?.delivery_address || order?.shipping_address || order?.address || '';
@@ -99,6 +101,30 @@ const OrderDetail = () => {
   const discountAmount = order?.discount_amount || order?.discount || 0;
   const totalAmount = order?.paid_amount;
   const createdAt = order?.created || order?.created_at || order?.ordered_at || order?.order_date;
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (!orderItems.length) {
+        setItemImages({});
+        return;
+      }
+
+      const images = {};
+      for (const [index, item] of orderItems.entries()) {
+        const productId = item.product_pk || item.product_id || item.id;
+        if (!productId || images[index]) continue;
+
+        const resolvedImage = await getOrderItemImage(item);
+        if (resolvedImage) {
+          images[index] = resolvedImage;
+        }
+      }
+
+      setItemImages(images);
+    };
+
+    loadImages();
+  }, [orderItems]);
 
   return (
     <>
@@ -291,7 +317,7 @@ const OrderDetail = () => {
                         const quantity = item.quantity || item.qty || item.order_quantity || 1;
                         const pricePaid = item.price_paid ?? item.paid_price ?? item.price ?? item.offer_price ?? item.amount ?? item.unit_price ?? 0;
                         const size = item.size || item.order_size || item.variant || '';
-                        const image = item.image || item.product_image || item.thumbnail || '';
+                        const image = itemImages[index] || DEFAULT_PRODUCT_IMAGE;
                         const totalPrice = item.total_price ?? item.total ?? item.amount ?? item.price_paid ?? item.paid_price ?? pricePaid * quantity;
 
                         return (

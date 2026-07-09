@@ -9,7 +9,7 @@ import { SITE_NAME, SIZE_LABELS, RAZORPAY_KEY_ID } from '../../utils/constants';
 import api from '../../api/gods-garden/axiosConfig';
 import Button from '../../components/common/Button/Button';
 import Input, { Textarea } from '../../components/common/Input/Input';
-import { cn } from '../../utils/helpers';
+import { buildCheckoutItems, cn } from '../../utils/helpers';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -125,6 +125,7 @@ const Checkout = () => {
         cart_id: cartId,
         razorpay: paymentMethod === 'razorpay',
         cash_on_delivery: paymentMethod === 'cod',
+        items: buildCheckoutItems(cartItems),
       };
 
       const response = await api.post('/create-order/', orderData);
@@ -169,6 +170,7 @@ const Checkout = () => {
               city: form.city,
               state: form.state,
               comment: form.comment,
+              items: buildCheckoutItems(cartItems),
             });
 
             setIsLoading(false);

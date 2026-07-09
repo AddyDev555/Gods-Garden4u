@@ -1,3 +1,6 @@
+import { API_BASE_URL } from './constants';
+import { getProductImageById } from '../api/productApi';
+
 /**
  * Generate a unique ID
  * @param {number} length - Length of the ID
@@ -86,6 +89,73 @@ export const debounce = (func, wait = 300) => {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
+};
+
+export const buildCheckoutItems = (items = []) =>
+  (Array.isArray(items) ? items : []).map((item) => {
+    const quantity = Number(item?.quantity ?? item?.qty ?? 1);
+    const offerPrice = Number(item?.offer_price || item?.price || 0);
+    const mrp = Number(item?.mrp || item?.offer_price || item?.price || 0);
+    const productName = item?.product_name || item?.name || item?.title || '';
+    const productImage = item?.image || item?.main_image || item?.product_image || item?.thumbnail || '';
+
+    const checkoutItem = {
+      product_pk: item?.id,
+      product_name: productName,
+      name: productName,
+      size: item?.size,
+      quantity,
+      qty: quantity,
+      offer_price: offerPrice,
+      mrp,
+      total_price: offerPrice * quantity,
+    };
+
+    if (productImage) {
+      checkoutItem.image = productImage;
+      checkoutItem.product_image = productImage;
+      checkoutItem.thumbnail = productImage;
+      checkoutItem.main_image = productImage;
+    }
+
+    return checkoutItem;
+  });
+
+export const getOrderItemImage = async (item = {}) => {
+  if (!item || typeof item !== 'object') return '';
+
+  const imageValue =
+    item.image ||
+    item.product_image ||
+    item.thumbnail ||
+    item.main_image ||
+    item.image_url ||
+    item.productImage ||
+    item.product_image_url ||
+    item.imageUrl ||
+    '';
+
+  if (imageValue && typeof imageValue === 'string') {
+    const trimmedValue = imageValue.trim();
+    if (!trimmedValue) return '';
+    if (trimmedValue.startsWith('data:')) return trimmedValue;
+    if (/^https?:\/\//i.test(trimmedValue) || trimmedValue.startsWith('//')) {
+      return trimmedValue.startsWith('//') ? `https:${trimmedValue}` : trimmedValue;
+    }
+
+    try {
+      return new URL(trimmedValue, API_BASE_URL).toString();
+    } catch {
+      return trimmedValue;
+    }
+  }
+
+  const productId = item.product_pk || item.product_id || item.id;
+  if (productId) {
+    return getProductImageById(productId);
+  }
+
+  return '';
 };
 
 /**

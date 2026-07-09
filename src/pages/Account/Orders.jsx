@@ -3,11 +3,12 @@ import { Helmet } from 'react-helmet';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiPackage, FiChevronRight, FiClock } from 'react-icons/fi';
 import { FaTruck } from "react-icons/fa";
-import { SITE_NAME } from '../../utils/constants';
+import { SITE_NAME, DEFAULT_PRODUCT_IMAGE } from '../../utils/constants';
 import Button from '../../components/common/Button/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import api from '../../api/gods-garden/axiosConfig';
+import { getOrderItemImage } from '../../utils/helpers';
 
 const Orders = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Orders = () => {
   const { formatPrice } = useCurrency();
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [itemImages, setItemImages] = useState({});
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,10 +31,8 @@ const Orders = () => {
         return;
       }
 
-      // Wait for user object to be populated from AuthContext
       if (!user) return;
 
-      // Check common variations of the ID field in case the structure differs
       const userId = user.id || user.user_id || user.pk || user.uid;
 
       if (!userId) {
@@ -58,6 +58,63 @@ const Orders = () => {
       fetchOrders();
     }
   }, [user, isAuthenticated]);
+
+  const getNormalizedOrderItems = (orderDetails) => {
+    if (!orderDetails) return [];
+
+    if (typeof orderDetails === 'string') {
+      try {
+        const parsed = JSON.parse(orderDetails);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    if (Array.isArray(orderDetails)) return orderDetails;
+    if (typeof orderDetails === 'object') {
+      if (Array.isArray(orderDetails.items)) return orderDetails.items;
+      return [orderDetails];
+    }
+
+    return [];
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadImages = async () => {
+      if (!orders.length) {
+        if (isMounted) setItemImages({});
+        return;
+      }
+
+      const images = {};
+      for (const order of orders) {
+        const orderItems = getNormalizedOrderItems(order?.order_details);
+        for (const item of orderItems) {
+          const productId = item.product_pk || item.product_id || item.id;
+          const cacheKey = `${order.order_id}-${productId}`;
+          if (!productId || images[cacheKey]) continue;
+
+          const resolvedImage = await getOrderItemImage(item);
+          if (resolvedImage) {
+            images[cacheKey] = resolvedImage;
+          }
+        }
+      }
+
+      if (isMounted) {
+        setItemImages(images);
+      }
+    };
+
+    loadImages();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [orders]);
 
   if (!isAuthenticated) return null;
 
@@ -87,31 +144,37 @@ const Orders = () => {
             </div>
           ) : orders.length > 0 ? (
             <div className="space-y-4">
-              {orders.map((order) => (
-                <div key={order.order_id} className="bg-white rounded-2xl shadow-soft overflow-hidden border border-neutral-100 hover:border-primary-200 transition-colors">
-                  <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-6">
-                    {/* Image on the left (showing the primary item) */}
-                    <div className="w-full sm:w-40 h-40 flex-shrink-0 bg-neutral-50 rounded-xl overflow-hidden border border-neutral-100">
-                      <img
-                        src={order.order_details[0]?.image}
-                        alt={order.order_details[0]?.product_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+              {orders.map((order) => {
+                const orderItems = getNormalizedOrderItems(order?.order_details);
+                const primaryItem = orderItems[0] || {};
+                const primaryImage = itemImages[`${order.order_id}-${primaryItem.product_pk || primaryItem.product_id || primaryItem.id}`] || '';
+                const primaryName = primaryItem.product_name || primaryItem.name || primaryItem.title || 'Order item';
 
-                    {/* Details on the right */}
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-start gap-4">
-                          <div>
-                            <h3 className="font-bold text-neutral-900 text-xl line-clamp-1">
-                              {order.order_details[0]?.product_name}
-                              {order.order_details.length > 1 && (
-                                <span className="text-sm font-normal text-neutral-500 ml-2">
-                                  + {order.order_details.length - 1} more items
-                                </span>
-                              )}
-                            </h3>
+                return (
+                  <div key={order.order_id} className="bg-white rounded-2xl shadow-soft overflow-hidden border border-neutral-100 hover:border-primary-200 transition-colors">
+                    <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-6">
+                      {/* Image on the left (showing the primary item) */}
+                      <div className="w-full sm:w-40 h-40 flex-shrink-0 bg-neutral-50 rounded-xl overflow-hidden border border-neutral-100">
+                        <img
+                          src={primaryImage || DEFAULT_PRODUCT_IMAGE}
+                          alt={primaryName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      {/* Details on the right */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start gap-4">
+                            <div>
+                              <h3 className="font-bold text-neutral-900 text-xl line-clamp-1">
+                                {primaryName}
+                                {orderItems.length > 1 && (
+                                  <span className="text-sm font-normal text-neutral-500 ml-2">
+                                    + {orderItems.length - 1} more items
+                                  </span>
+                                )}
+                              </h3>
                             <p className="text-xs font-mono font-medium text-neutral-400 mt-1 uppercase tracking-tight">
                               Order ID: <span className="text-neutral-600 font-bold">#{order.order_id.slice(0, 8)}</span>
                             </p>
@@ -213,18 +276,19 @@ const Orders = () => {
 
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-neutral-50 flex justify-end">
-                        <Link
-                          to={`/account/orders/${order.order_id}`}
-                          className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline"
-                        >
-                          View Order Details <FiChevronRight />
-                        </Link>
+                        <div className="mt-4 pt-4 border-t border-neutral-50 flex justify-end">
+                          <Link
+                            to={`/account/orders/${order.order_id}`}
+                            className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline"
+                          >
+                            View Order Details <FiChevronRight />
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="bg-white rounded-2xl p-8 shadow-soft text-center border border-neutral-100">

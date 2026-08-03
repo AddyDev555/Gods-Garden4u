@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiHeart, FiShoppingCart, FiEye, FiMessageSquare, FiStar } from 'react-icons/fi';
+import { FiHeart, FiShoppingCart, FiEye, FiMessageSquare, FiStar, FiCheck } from 'react-icons/fi';
 import { useCurrency } from '../../../context/CurrencyContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import { useShop } from '../../../context/ShopContext';
@@ -17,7 +17,7 @@ import { createProductReview } from '../../../api/gods-garden/productApi';
 const ProductCard = ({ product, className, hideWishlistButton = false, isWishlisted: isWishlistedOverride, onWishlistChange, onReviewAdded }) => {
   const { formatPrice } = useCurrency();
   const { isInWishlist, toggleWishlist } = useWishlist();
-  const { addToCart, isUpdating } = useShop();
+  const { addToCart, isUpdating, cartItems } = useShop();
   const toast = useToast();
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -104,10 +104,14 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
 
   const isInStock = productQuantity > 0 || pricingHasStock;
 
+  const cartItem = cartItems.find((item) => item.id === id && item.size === defaultSize);
+  const isInCart = Boolean(cartItem);
+  const cartQuantity = cartItem?.quantity || 0;
+
   // Calculate display orders - show random number > 100 if orders_booked is 0
-  const displayOrders = orders_booked && orders_booked > 0 
-    ? orders_booked 
-    : Math.floor(Math.random() * 900) + 101; // Random number between 101 and 1000
+  // const displayOrders = orders_booked && orders_booked > 0 
+  //   ? orders_booked 
+  //   : Math.floor(Math.random() * 900) + 101; // Random number between 101 and 1000
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -335,6 +339,14 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
           />
         </div>
 
+        {/* In Cart indicator */}
+        {isInCart && (
+          <span className="absolute top-3 left-3 z-20 inline-flex items-center gap-1 rounded-full bg-success-500 text-white text-[10px] font-medium px-2 py-1 shadow-md">
+            <FiCheck className="w-3 h-3" />
+            In Cart{cartQuantity > 1 ? ` (${cartQuantity})` : ''}
+          </span>
+        )}
+
         {/* Quick Actions */}
         <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
           {!hideWishlistButton && (
@@ -414,9 +426,9 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
               <span className="text-sm font-semibold text-neutral-900">{rating}</span>
               <FiStar className="w-4 h-4 text-accent-500 fill-current" />
             </div>
-            <span className="text-xs text-neutral-600">
+            {/* <span className="text-xs text-neutral-600">
               {displayOrders} {displayOrders === 1 ? 'order' : 'orders'}
-            </span>
+            </span> */}
           </div>
         )}
         </div>
@@ -435,13 +447,22 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
             'w-full py-2 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm',
             'flex items-center justify-center gap-1 sm:gap-2',
             'transition-all duration-200',
-            isInStock
-              ? 'bg-primary-500 text-white hover:bg-primary-600'
-              : 'bg-neutral-200 text-neutral-500 cursor-not-allowed'
+            !isInStock
+              ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed'
+              : isInCart
+                ? 'bg-success-50 text-success-600 border border-success-500 hover:bg-success-50/70'
+                : 'bg-primary-500 text-white hover:bg-primary-600'
           )}
         >
-          <FiShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
-          {isInStock ? 'Add to Cart' : 'Out of Stock'}
+          <span className="relative inline-flex">
+            <FiShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
+            {isInStock && isInCart && (
+              <span className="absolute -top-2 -right-2 min-w-[14px] h-[14px] px-[3px] rounded-full bg-success-500 text-white text-[9px] leading-[14px] text-center font-bold">
+                x{cartQuantity}
+              </span>
+            )}
+          </span>
+          {!isInStock ? 'Out of Stock' : 'Add to Cart'}
         </button>
       </div>
     </motion.div>

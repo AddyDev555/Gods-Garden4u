@@ -158,13 +158,18 @@ export const ShopContextProvider = ({ children }) => {
 
       const previousItems = [...cartItems];
 
+      // Backend sets the quantity for a cart line rather than incrementing it,
+      // so the request must always carry the cumulative total, not just the delta.
+      const totalQuantity =
+        existingIndex >= 0 ? cartItems[existingIndex].quantity + quantity : quantity;
+
       if (existingIndex >= 0) {
         // Update existing item
         setCartItems((prev) => {
           const updated = [...prev];
           updated[existingIndex] = {
             ...updated[existingIndex],
-            quantity: updated[existingIndex].quantity + quantity,
+            quantity: totalQuantity,
           };
           return updated;
         });
@@ -188,7 +193,7 @@ export const ShopContextProvider = ({ children }) => {
           cart_id: cartId,
           product_pk: productId,
           size,
-          quantity,
+          quantity: totalQuantity,
           offer_price: offerPrice,
           mrp,
           is_direct_buy: isDirectBuy,
@@ -298,12 +303,12 @@ export const ShopContextProvider = ({ children }) => {
 
       try {
         if (diff > 0) {
-          // Increase quantity - add the difference
+          // Increase quantity - backend sets the absolute quantity, so send the new total
           await api.post('/cart-items/', {
             cart_id: cartId,
             product_pk: productId,
             size,
-            quantity: diff,
+            quantity: newQuantity,
             offer_price: offerPrice,
             mrp,
           });

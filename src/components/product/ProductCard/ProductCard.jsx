@@ -48,7 +48,6 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
     top_selling,
     quantity,
     size = [],
-    orders_booked = 0,
   } = product;
 
   const baseImage = main_image || product.image || product.product_image || DEFAULT_PRODUCT_IMAGE;

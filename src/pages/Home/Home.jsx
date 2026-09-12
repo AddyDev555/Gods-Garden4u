@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
-import { FiArrowRight, FiShield, FiTruck, FiAward, FiHeart, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiArrowRight, FiArrowUpRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '../../utils/constants';
 import { getOrganizationSchema, getWebSiteSchema, serializeSchema } from '../../utils/structuredData';
 import Button from '../../components/common/Button/Button';
@@ -10,6 +10,70 @@ import ProductCard from '../../components/product/ProductCard/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton/Skeleton';
 import { getProductCategories, getAllProducts } from '../../api/gods-garden/productApi';
 import IntroPopup from '../../components/common/Splash-Screen/Splash';
+import TrendingNow from "./components/Trending";
+import WhyGodsGarden from './components/Whyus';
+// import ReviewsSection from './components/Reviews';
+
+const MOOD_IMAGES = [
+  {
+    id: 1,
+    label: "COUPLES",
+    image: "/images/Reviews/review3.jpg",
+    rotation: "-rotate-[10deg]",
+    offset: "translate-y-2",
+  },
+  {
+    id: 2,
+    label: "CHILDRENS",
+    image: "/images/Reviews/review2.jpg",
+    rotation: "rotate-[6deg]",
+    offset: "-translate-y-2",
+  },
+  {
+    id: 3,
+    label: "OFFICERS",
+    image: "/images/Reviews/review1.jpg",
+    rotation: "-rotate-[4deg]",
+    offset: "translate-y-1",
+  },
+  {
+    id: 4,
+    label: "OFFICERS",
+    image: "/images/Reviews/review4.jpeg",
+    rotation: "rotate-[8deg]",
+    offset: "-translate-y-1",
+  },
+  {
+    id: 5,
+    label: "OFFICERS",
+    image: "/images/Reviews/review5.jpeg",
+    rotation: "-rotate-[6deg]",
+    offset: "translate-y-2",
+  },
+  {
+    id: 7,
+    label: "OFFICERS",
+    image: "/images/Reviews/review7.jpeg",
+    rotation: "rotate-[5deg]",
+    offset: "-translate-y-1",
+  },
+  {
+    id: 8,
+    label: "OFFICERS",
+    image: "/images/Reviews/review8.jpeg",
+    rotation: "-rotate-[8deg]",
+    offset: "translate-y-2",
+  },
+  {
+    id: 9,
+    label: "OFFICERS",
+    image: "/images/Reviews/review9.jpeg",
+    rotation: "rotate-[6deg]",
+    offset: "-translate-y-2",
+  },
+];
+
+// ─── Star Rating Component ────────────────────────────────────────────────────
 
 // ─── WhatsApp config ──────────────────────────────────────────────────────────
 const WHATSAPP_NUMBER = '917738489220'; // replace with actual number (country code + number, no +)
@@ -324,33 +388,55 @@ const Home = () => {
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
   const [healthyComboProducts, setHealthyComboProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoadingProducts(true);
+
       try {
-        const allProducts = await getAllProducts();
-        const topSelling = allProducts.filter((p) => p.top_selling);
-        const newArrivals = allProducts.filter((p) => p.new_arrival);
-        const healthyCombos = allProducts.filter((p) => Number(p.category_id) === HEALTHY_COMBO_CATEGORY_ID);
+        const products = await getAllProducts();
+
+        setAllProducts(products);
+
+        const topSelling = products.filter((p) => p.top_selling);
+        const newArrivals = products.filter((p) => p.new_arrival);
+        const healthyCombos = products.filter(
+          (p) => Number(p.category_id) === HEALTHY_COMBO_CATEGORY_ID
+        );
 
         setTopSellingProducts(topSelling.slice(0, 8));
         setNewArrivalProducts(newArrivals.slice(0, 8));
         setHealthyComboProducts(healthyCombos.slice(0, 8));
       } catch (error) {
-        console.error('Failed to fetch products:', error);
+        console.error("Failed to fetch products:", error);
       } finally {
         setIsLoadingProducts(false);
       }
+    };
+
+    const extractCategoryIdFromLink = (navigateLink) => {
+      if (!navigateLink) return null;
+      const match = navigateLink.match(/[?&]category=(\d+)/);
+      return match ? Number(match[1]) : null;
     };
 
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
       try {
         const cats = await getProductCategories();
-        const sortedCats = sortCategoriesByHomepageOrder(cats);
+
+        // Normalize: attach a real numeric id derived from navigate_link
+        const catsWithId = cats.map((cat) => ({
+          ...cat,
+          id: extractCategoryIdFromLink(cat.navigate_link),
+        }));
+
+        const sortedCats = sortCategoriesByHomepageOrder(catsWithId);
         setCategories(sortedCats);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -363,28 +449,11 @@ const Home = () => {
     fetchCategories();
   }, []);
 
-  const benefits = [
-    {
-      icon: FiAward,
-      title: '100% Organic',
-      description: 'Certified organic products sourced directly from trusted farms.',
-    },
-    {
-      icon: FiTruck,
-      title: 'Free Shipping',
-      description: 'Free delivery on orders above ₹499 across India.',
-    },
-    {
-      icon: FiShield,
-      title: 'Quality Assured',
-      description: 'Rigorous quality checks to ensure the best for you.',
-    },
-    {
-      icon: FiHeart,
-      title: 'Customer Love',
-      description: '10,000+ happy customers trust us for their daily needs.',
-    },
-  ];
+  useEffect(() => {
+    if (categories.length > 0 && activeCategoryId === null) {
+      setActiveCategoryId(categories[0].id);
+    }
+  }, [categories, activeCategoryId]);
 
   return (
     <>
@@ -409,76 +478,208 @@ const Home = () => {
       {/* ── Shop by Category ── */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+
+          {/* Heading */}
           <motion.div
             initial="visible"
             animate="visible"
             variants={stagger}
-            className="text-center mb-8 sm:mb-12"
+            className="text-center mb-7 sm:mb-10"
           >
-            <motion.h2 variants={fadeInUp} className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
+            <motion.h2
+              variants={fadeInUp}
+              className="
+          font-display
+          text-2xl sm:text-3xl md:text-4xl
+          font-bold
+          text-neutral-900
+          mb-3
+        "
+            >
               Shop by Category
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto text-sm sm:text-base">
+
+            <motion.p
+              variants={fadeInUp}
+              className="text-neutral-600 max-w-2xl mx-auto text-sm sm:text-base"
+            >
               Explore our wide range of organic products
             </motion.p>
           </motion.div>
 
-          <motion.div
-            initial="visible"
-            animate="visible"
-            variants={stagger}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
-          >
-            {isLoadingCategories ? (
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="flex flex-col items-center gap-3">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-neutral-200 rounded-full animate-pulse" />
-                  <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse" />
-                </div>
-              ))
-            ) : categories.length > 0 ? (
-              categories.slice(0, 8).map((category) => (
-                <motion.div key={category.id} variants={fadeInUp}>
-                  <Link
-                    to={category.navigate_link || `/shop?category=${category.id}`}
-                    className="flex flex-col items-center gap-2 sm:gap-3 group"
+
+          {/* ── Category Menu ── */}
+          {!isLoadingCategories && categories.length > 0 && (
+            <div className="mb-8 sm:mb-10">
+
+              {/* Horizontal scrolling category navigation */}
+              <div
+                className="
+            flex
+            items-center
+            justify-start
+            sm:justify-center
+            gap-6
+            sm:gap-8
+            md:gap-10
+            overflow-x-auto
+            pb-3
+            px-1
+            [&::-webkit-scrollbar]:hidden
+            [-ms-overflow-style:'none']
+            [scrollbar-width:'none']
+          "
+              >
+                {categories.map((category) => {
+                  const isActive =
+                    Number(activeCategoryId) === Number(category.id);
+
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => setActiveCategoryId(category.id)}
+                      className={`
+                  relative
+                  flex-shrink-0
+                  pb-2
+                  text-sm
+                  sm:text-base
+                  font-medium
+                  whitespace-nowrap
+                  transition-colors
+                  duration-300
+
+                  ${isActive
+                          ? "text-neutral-900"
+                          : "text-neutral-400 hover:text-neutral-700"
+                        }
+                `}
+                    >
+                      {category.name}
+
+                      {/* Active underline */}
+                      <span
+                        className={`
+                    absolute
+                    left-0
+                    right-0
+                    bottom-0
+                    mx-auto
+                    h-[2px]
+                    bg-neutral-900
+                    transition-all
+                    duration-300
+                    ${isActive
+                            ? "w-full opacity-100"
+                            : "w-0 opacity-0"
+                          }
+                  `}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+
+          {/* ── Products ── */}
+          {(() => {
+            const activeCategory = categories.find(
+              (category) =>
+                String(category.id) === String(activeCategoryId)
+            );
+
+            const categoryProducts = activeCategory
+              ? allProducts
+                .filter(
+                  (product) =>
+                    String(product.category_id) === String(activeCategory.id)
+                )
+                .slice(0, 4)
+              : [];
+            return (
+              <>
+                {/* Loading */}
+                {isLoadingProducts ? (
+                  <div
+                    className="
+                grid
+                grid-cols-2
+                md:grid-cols-3
+                lg:grid-cols-4
+                gap-3
+                sm:gap-4
+                lg:gap-6
+              "
                   >
-                    <div className="w-36 h-36 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
-                      {category.media ? (
-                        <img src={category.media} alt={category.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                          <span className="text-3xl sm:text-4xl lg:text-6xl">📦</span>
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-neutral-800 text-center group-hover:text-primary-600 transition-colors">
-                      {category.name}
-                    </h3>
-                  </Link>
-                </motion.div>
-              ))
-            ) : (
-              [
-                { name: 'Fruits chips', emoji: '🍎', slug: 'fruits-chips' },
-                { name: 'Healthy Combo', emoji: '🥗', slug: 'healthy-combo' },
-                { name: 'Leaf / Superfood', emoji: '🌿', slug: 'leaf-superfood' },
-                { name: 'Fruits & Vegetable Powders', emoji: '🥦', slug: 'fruits-vegetable-powders' },
-              ].map((category) => (
-                <motion.div key={category.slug} variants={fadeInUp}>
-                  <Link to={`/category/${category.slug}`} className="flex flex-col items-center gap-2 sm:gap-3 group">
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                      <span className="text-3xl sm:text-4xl lg:text-6xl">{category.emoji}</span>
-                    </div>
-                    <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-neutral-800 text-center group-hover:text-primary-600 transition-colors">
-                      {category.name}
-                    </h3>
-                  </Link>
-                </motion.div>
-              ))
-            )}
-          </motion.div>
+                    {[...Array(4)].map((_, i) => (
+                      <ProductCardSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : categoryProducts.length > 0 ? (
+
+                  /* Products */
+                  <motion.div
+                    key={activeCategoryId}
+                    initial="hidden"
+                    animate="visible"
+                    variants={stagger}
+                    className="
+                grid
+                grid-cols-2
+                md:grid-cols-3
+                lg:grid-cols-4
+                gap-3
+                sm:gap-4
+                lg:gap-6
+              "
+                  >
+                    {categoryProducts.map((product) => (
+                      <motion.div
+                        key={product.id}
+                        variants={fadeInUp}
+                      >
+                        <ProductCard product={product} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+
+                ) : (
+
+                  /* No products */
+                  <div className="py-12 text-center">
+                    <p className="text-neutral-500 text-sm sm:text-base">
+                      No products available in this category.
+                    </p>
+                  </div>
+                )}
+
+
+                {/* ── View More ── */}
+                {categoryProducts.length > 0 && activeCategory && (
+                  <div className="text-center mt-8 sm:mt-10">
+                    <Button
+                      as={Link}
+                      to={
+                        activeCategory.navigate_link ||
+                        `/shop?category=${activeCategory.id}`
+                      }
+                      variant="outline"
+                      icon={<FiArrowRight />}
+                      iconPosition="right"
+                    >
+                      View More
+                    </Button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
         </div>
+
         <LeafDivider className="text-primary-200" />
       </section>
 
@@ -494,7 +695,7 @@ const Home = () => {
             variants={stagger}
             className="text-center mb-8 sm:mb-12"
           >
-            <motion.h2 variants={fadeInUp} className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
+            <motion.h2 variants={fadeInUp} className="font-serif italic text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
               New Arrivals
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto text-sm sm:text-base">
@@ -527,6 +728,170 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ── Pick Your Mood ── */}
+      <section className="relative py-5 sm:py-12 mt-5 md:py-16 overflow-hidden">
+
+        {/* Background video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        >
+          <source src="/images/Reviews/happiness.mp4" type="video/mp4" />
+        </video>
+
+        {/* Beige overlay — controls how visible the video is */}
+        <div className="absolute inset-0 bg-[#f5f0e6]/75" />
+
+        {/* Optional subtle white wash */}
+        <div className="absolute inset-0 bg-white/10" />
+
+        <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl relative z-10">
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-10 sm:mb-14"
+          >
+            <motion.p
+              variants={fadeInUp}
+              className="font-serif italic text-2xl sm:text-3xl md:text-4xl text-[#15803d] mb-[-8px] relative z-10"
+              style={{ fontFamily: "'Brush Script MT', cursive" }}
+            >
+              Happiness
+            </motion.p>
+
+            <motion.h2
+              variants={fadeInUp}
+              className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#1d1d1d] leading-none"
+            >
+              in Every Bite
+            </motion.h2>
+
+            <motion.p
+              variants={fadeInUp}
+              className="font-serif text-sm text-[#1d1d1d] leading-none"
+            >
+              happy customers, and flavours made to be enjoyed.
+            </motion.p>
+          </motion.div>
+
+          {/* Your existing polaroid cards */}
+          {/* ── Mobile Gallery: 2 straight images per row ── */}
+          <div className="grid grid-cols-2 gap-3 sm:hidden">
+            {MOOD_IMAGES.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeInUp}
+                transition={{ delay: index * 0.08 }}
+                className="relative"
+              >
+                <div
+                  className="
+          relative
+          w-full
+          bg-white
+          p-1.5
+          pb-1.5
+          rounded-[2px]
+          shadow-[0_6px_15px_rgba(0,0,0,0.15)]
+        "
+                >
+                  <div className="relative w-full aspect-[4/5] overflow-hidden">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: `url(${item.image})`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="h-2" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+
+          {/* ── Desktop Gallery: overlapping rotated polaroids ── */}
+          <div className="hidden sm:flex items-center justify-center flex-nowrap">
+            {MOOD_IMAGES.map((item, index) => {
+              const isHovered = hoveredIndex === index;
+
+              return (
+                <motion.div
+                  key={item.id}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={fadeInUp}
+                  transition={{ delay: index * 0.08 }}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  style={{
+                    zIndex: isHovered ? 40 : index,
+                    marginLeft: index === 0 ? 0 : "-2.75rem",
+                  }}
+                  className="relative"
+                >
+                  <div
+                    className={`
+            relative
+            w-[190px] md:w-[210px] lg:w-[230px]
+            bg-white
+            p-2
+            pb-0
+            rounded-[2px]
+            shadow-[0_10px_25px_rgba(0,0,0,0.18)]
+            transition-all
+            duration-500
+            ease-out
+            ${item.rotation}
+            ${item.offset}
+            ${isHovered
+                        ? "!rotate-0 !translate-y-0 scale-110 shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
+                        : ""
+                      }
+          `}
+                  >
+                    <div className="relative w-full aspect-[4/5] overflow-hidden">
+                      <div
+                        className="
+                absolute inset-0
+                bg-cover
+                bg-center
+                bg-no-repeat
+                transition-transform
+                duration-500
+              "
+                        style={{
+                          backgroundImage: `url(${item.image})`,
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between px-1 py-4">
+                      {item.hasArrow && (
+                        <FiArrowUpRight className="h-5 w-5 text-[#c0392b] shrink-0" />
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
       {/* ── Healthy Combos ── */}
       <section className="py-10 sm:py-14 md:py-16 bg-neutral-50">
         <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
@@ -537,7 +902,7 @@ const Home = () => {
             variants={stagger}
             className="text-center mb-8 sm:mb-12"
           >
-            <motion.h2 variants={fadeInUp} className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
+            <motion.h2 variants={fadeInUp} className="font-serif italic text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
               Healthy Combos
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-neutral-600 max-w-2xl mx-auto text-sm sm:text-base">
@@ -578,6 +943,10 @@ const Home = () => {
         </div>
       </section>
 
+      <section>
+        <TrendingNow />
+      </section>
+
       {/* ── CTA Section — WhatsApp-focused ── */}
       <section className="py-12 sm:py-16 bg-green-700 text-white relative overflow-hidden">
         {/* Decorative circles */}
@@ -591,7 +960,7 @@ const Home = () => {
             viewport={{ once: true }}
             variants={stagger}
           >
-            <motion.h2 variants={fadeInUp} className="font-display text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
+            <motion.h2 variants={fadeInUp} className="font-serif italic text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
               Ready to Experience Premium Quality?
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-green-100 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
@@ -622,46 +991,11 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Benefits Section ── */}
-      <section className="py-10 sm:py-14 md:py-16 bg-white">
-        <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="text-center mb-8 sm:mb-10"
-          >
-            <motion.h2 variants={fadeInUp} className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3">
-              Why Choose Gods Garden?
-            </motion.h2>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-            variants={stagger}
-            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
-          >
-            {benefits.map((benefit) => {
-              const Icon = benefit.icon;
-              return (
-                <motion.div
-                  key={benefit.title}
-                  variants={fadeInUp}
-                  className="flex flex-col items-center text-center p-4 sm:p-6 rounded-2xl bg-neutral-50 hover:bg-primary-50 transition-colors"
-                >
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-3 sm:mb-4">
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </div>
-                  <h3 className="font-semibold text-base sm:text-lg text-neutral-900 mb-1 sm:mb-2">{benefit.title}</h3>
-                  <p className="text-neutral-600 text-xs sm:text-sm">{benefit.description}</p>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
+      <section>
+        <WhyGodsGarden />
       </section>
+
+      {/* <ReviewsSection /> */}
 
       {/* ── Floating WhatsApp FAB ── */}
       <WhatsAppFAB />

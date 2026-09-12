@@ -47,11 +47,13 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen pt-[96px] lg:pt-[112px]">
+      {/* Navigation */}
+      <Navbar />
+      
       {/* Promotional Scroller */}
       <Scroller />
 
-      {/* Navigation */}
-      <Navbar />
+      
 
       {/* Main Content */}
       <main className="flex-grow">

@@ -1,0 +1,350 @@
+import pandas as pd
+import re
+from rapidfuzz.fuzz import token_set_ratio
+from openpyxl import load_workbook
+
+INPUT_FILE = "Reconciled_Output (2).xlsx"
+OUTPUT_FILE = "GBP_INR_Same_Entries.xlsx"
+
+# ---------------------------------------------------------
+# SETTINGS
+# ---------------------------------------------------------
+
+# Maximum date difference allowed for a possible match
+MAX_DATE_DIFFERENCE_DAYS = 7
+
+# Description similarity threshold
+SIMILARITY_THRESHOLD = 70
+
+
+# ---------------------------------------------------------
+# CLEAN TRANSACTION DESCRIPTION
+# ---------------------------------------------------------
+
+def normalize_text(text):
+    if pd.isna(text):
+        return ""
+
+    text = str(text).upper()
+
+    # Remove UUIDs
+    text = re.sub(
+        r"\b[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\b",
+        " ",
+        text
+    )
+
+    # Remove IBAN-like values
+    text = re.sub(
+        r"\b[A-Z]{2}[0-9A-Z]{10,34}\b",
+        " ",
+        text
+    )
+
+    # Remove excessive punctuation
+    text = re.sub(r"[^A-Z0-9\s]", " ", text)
+
+    # Normalize spaces
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
+
+# ---------------------------------------------------------
+# LOAD WORKBOOK
+# ---------------------------------------------------------
+
+df = pd.read_excel(
+    INPUT_FILE,
+    sheet_name="Account Transactions",
+    header=0
+)
+
+# ---------------------------------------------------------
+# LEFT SIDE = GBP
+# ---------------------------------------------------------
+
+gbp = df.iloc[:, [0, 1, 2, 3]].copy()
+
+gbp.columns = [
+    "GBP_Date",
+    "GBP_Details",
+    "GBP_Debit",
+    "GBP_Credit"
+]
+
+gbp = gbp.dropna(
+    subset=["GBP_Date", "GBP_Details"],
+    how="all"
+)
+
+# ---------------------------------------------------------
+# RIGHT SIDE = INR
+# ---------------------------------------------------------
+
+inr = df.iloc[:, [6, 7, 8, 9]].copy()
+
+inr.columns = [
+    "INR_Date",
+    "INR_Details",
+    "INR_Debit",
+    "INR_Credit"
+]
+
+inr = inr.dropna(
+    subset=["INR_Date", "INR_Details"],
+    how="all"
+)
+
+# ---------------------------------------------------------
+# DATE CONVERSION
+# ---------------------------------------------------------
+
+gbp["GBP_Date"] = pd.to_datetime(
+    gbp["GBP_Date"],
+    errors="coerce"
+)
+
+inr["INR_Date"] = pd.to_datetime(
+    inr["INR_Date"],
+    errors="coerce"
+)
+
+# ---------------------------------------------------------
+# ADD NORMALIZED DESCRIPTIONS
+# ---------------------------------------------------------
+
+gbp["Normalized"] = gbp["GBP_Details"].apply(normalize_text)
+inr["Normalized"] = inr["INR_Details"].apply(normalize_text)
+
+# ---------------------------------------------------------
+# DETERMINE DEBIT / CREDIT DIRECTION
+# ---------------------------------------------------------
+
+def transaction_type(row, debit_col, credit_col):
+
+    debit = row[debit_col]
+    credit = row[credit_col]
+
+    if pd.notna(debit) and float(debit) != 0:
+        return "DEBIT"
+
+    if pd.notna(credit) and float(credit) != 0:
+        return "CREDIT"
+
+    return "UNKNOWN"
+
+
+gbp["Type"] = gbp.apply(
+    lambda x: transaction_type(
+        x,
+        "GBP_Debit",
+        "GBP_Credit"
+    ),
+    axis=1
+)
+
+inr["Type"] = inr.apply(
+    lambda x: transaction_type(
+        x,
+        "INR_Debit",
+        "INR_Credit"
+    ),
+    axis=1
+)
+
+# ---------------------------------------------------------
+# MATCH TRANSACTIONS
+# ---------------------------------------------------------
+
+matches = []
+used_inr = set()
+
+for gbp_index, g in gbp.iterrows():
+
+    best_match = None
+    best_score = 0
+
+    for inr_index, i in inr.iterrows():
+
+        # Do not reuse an INR transaction
+        if inr_index in used_inr:
+            continue
+
+        # Direction must match
+        if g["Type"] != i["Type"]:
+            continue
+
+        # Date comparison
+        if pd.notna(g["GBP_Date"]) and pd.notna(i["INR_Date"]):
+
+            date_difference = abs(
+                (g["GBP_Date"] - i["INR_Date"]).days
+            )
+
+            if date_difference > MAX_DATE_DIFFERENCE_DAYS:
+                continue
+
+        else:
+            date_difference = None
+
+        # Description similarity
+        score = token_set_ratio(
+            g["Normalized"],
+            i["Normalized"]
+        )
+
+        if score >= SIMILARITY_THRESHOLD:
+
+            # Slightly prioritize closer dates
+            adjusted_score = score
+
+            if date_difference is not None:
+                adjusted_score -= date_difference * 1.5
+
+            if adjusted_score > best_score:
+                best_score = adjusted_score
+                best_match = (
+                    inr_index,
+                    score,
+                    date_difference
+                )
+
+    # -----------------------------------------------------
+    # SAVE BEST MATCH
+    # -----------------------------------------------------
+
+    if best_match:
+
+        inr_index, similarity, date_difference = best_match
+
+        i = inr.loc[inr_index]
+
+        used_inr.add(inr_index)
+
+        matches.append({
+
+            "GBP_Row": gbp_index + 2,
+            "GBP_Date": g["GBP_Date"],
+            "GBP_Details": g["GBP_Details"],
+            "GBP_Debit": g["GBP_Debit"],
+            "GBP_Credit": g["GBP_Credit"],
+
+            "INR_Row": inr_index + 2,
+            "INR_Date": i["INR_Date"],
+            "INR_Details": i["INR_Details"],
+            "INR_Debit": i["INR_Debit"],
+            "INR_Credit": i["INR_Credit"],
+
+            "Transaction_Type": g["Type"],
+            "Date_Difference_Days": date_difference,
+            "Description_Similarity": round(similarity, 2),
+
+            "Same_Entry": "YES"
+        })
+
+
+# ---------------------------------------------------------
+# CREATE RESULT DATAFRAME
+# ---------------------------------------------------------
+
+matches_df = pd.DataFrame(matches)
+
+# ---------------------------------------------------------
+# FIND UNMATCHED GBP ENTRIES
+# ---------------------------------------------------------
+
+matched_gbp_rows = set(
+    matches_df["GBP_Row"]
+) if not matches_df.empty else set()
+
+unmatched_gbp = []
+
+for index, row in gbp.iterrows():
+
+    excel_row = index + 2
+
+    if excel_row not in matched_gbp_rows:
+
+        unmatched_gbp.append({
+            "GBP_Row": excel_row,
+            "GBP_Date": row["GBP_Date"],
+            "GBP_Details": row["GBP_Details"],
+            "GBP_Debit": row["GBP_Debit"],
+            "GBP_Credit": row["GBP_Credit"],
+            "Status": "NO MATCH IN INR"
+        })
+
+unmatched_gbp_df = pd.DataFrame(unmatched_gbp)
+
+# ---------------------------------------------------------
+# FIND UNMATCHED INR ENTRIES
+# ---------------------------------------------------------
+
+matched_inr_rows = set(
+    matches_df["INR_Row"]
+) if not matches_df.empty else set()
+
+unmatched_inr = []
+
+for index, row in inr.iterrows():
+
+    excel_row = index + 2
+
+    if excel_row not in matched_inr_rows:
+
+        unmatched_inr.append({
+            "INR_Row": excel_row,
+            "INR_Date": row["INR_Date"],
+            "INR_Details": row["INR_Details"],
+            "INR_Debit": row["INR_Debit"],
+            "INR_Credit": row["INR_Credit"],
+            "Status": "NO MATCH IN GBP"
+        })
+
+unmatched_inr_df = pd.DataFrame(unmatched_inr)
+
+# ---------------------------------------------------------
+# WRITE OUTPUT
+# ---------------------------------------------------------
+
+with pd.ExcelWriter(
+    OUTPUT_FILE,
+    engine="openpyxl"
+) as writer:
+
+    matches_df.to_excel(
+        writer,
+        sheet_name="Same Entries",
+        index=False
+    )
+
+    unmatched_gbp_df.to_excel(
+        writer,
+        sheet_name="Unmatched GBP",
+        index=False
+    )
+
+    unmatched_inr_df.to_excel(
+        writer,
+        sheet_name="Unmatched INR",
+        index=False
+    )
+
+# ---------------------------------------------------------
+# SUMMARY
+# ---------------------------------------------------------
+
+print("=" * 70)
+print("GBP vs INR ENTRY COMPARISON")
+print("=" * 70)
+
+print(f"GBP transactions       : {len(gbp)}")
+print(f"INR transactions       : {len(inr)}")
+print(f"Same entries found     : {len(matches_df)}")
+print(f"Unmatched GBP entries  : {len(unmatched_gbp_df)}")
+print(f"Unmatched INR entries  : {len(unmatched_inr_df)}")
+
+print()
+print(f"Output file: {OUTPUT_FILE}")
+print("=" * 70)

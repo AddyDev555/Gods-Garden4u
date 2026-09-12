@@ -6,6 +6,42 @@ import { storage } from '../utils/helpers';
 // Create context
 const AuthContext = createContext(null);
 
+const getUserId = (userObject) => {
+  if (!userObject || typeof userObject !== 'object') return null;
+
+  return (
+    userObject.id ??
+    userObject.user_id ??
+    userObject.pk ??
+    userObject.uid ??
+    userObject.user?.id ??
+    userObject.user?.user_id ??
+    userObject.user?.pk ??
+    userObject.user?.uid ??
+    null
+  );
+};
+
+const normalizeUser = (payload) => {
+  const raw = payload?.user ?? payload?.data?.user ?? payload?.data ?? payload;
+  if (!raw || typeof raw !== 'object') return {};
+
+  const normalized = { ...raw };
+
+  if (normalized.user && typeof normalized.user === 'object') {
+    Object.assign(normalized, normalized.user);
+  }
+
+  if (!normalized.id && !normalized.user_id && !normalized.pk && !normalized.uid) {
+    const fallbackId = getUserId(normalized.user ?? raw);
+    if (fallbackId !== null) {
+      normalized.id = fallbackId;
+    }
+  }
+
+  return normalized;
+};
+
 /**
  * AuthProvider - Manages authentication state
  */
@@ -59,15 +95,17 @@ export const AuthProvider = ({ children }) => {
         country_code: countryCode,
       });
 
-      const { token: authToken, ...userData } = response.data;
+      const payload = response.data?.data ?? response.data ?? {};
+      const { token: authToken, ...rest } = payload;
+      const normalizedUser = normalizeUser({ ...rest, token: authToken });
 
       if (authToken) {
         setToken(authToken);
         storage.set(STORAGE_KEYS.AUTH_TOKEN, authToken);
       }
 
-      setUser(userData);
-      storage.set(STORAGE_KEYS.USER, userData);
+      setUser(normalizedUser);
+      storage.set(STORAGE_KEYS.USER, normalizedUser);
 
       return { success: true, data: response.data };
     } catch (err) {
@@ -93,14 +131,16 @@ export const AuthProvider = ({ children }) => {
         country_code: userData.countryCode || '91',
       });
 
-      const { token: authToken, ...user } = response.data;
+      const payload = response.data?.data ?? response.data ?? {};
+      const { token: authToken, ...rest } = payload;
+      const normalizedUser = normalizeUser({ ...rest, token: authToken });
 
       // Auto-login after registration
       if (authToken) {
         setToken(authToken);
-        setUser(user);
+        setUser(normalizedUser);
         storage.set(STORAGE_KEYS.AUTH_TOKEN, authToken);
-        storage.set(STORAGE_KEYS.USER, user);
+        storage.set(STORAGE_KEYS.USER, normalizedUser);
       }
 
       return { success: true, data: response.data };

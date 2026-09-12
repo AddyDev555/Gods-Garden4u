@@ -165,6 +165,7 @@ const Product = () => {
     pricing,
     size = [],
     rating,
+    order_count,
     new_arrival,
     top_selling,
   } = product;
@@ -176,6 +177,7 @@ const Product = () => {
   const stockQuantity = sizePrice[2] || 0;
 
   const discount = calculateDiscount(displayMrp, displayPrice);
+  const orderedCount = Number(order_count ?? 0);
   const isWishlisted = isInWishlist(id);
   const images = [main_image, second_media, third_media, fourth_media, fifth_media].filter(Boolean);
 
@@ -313,6 +315,11 @@ const Product = () => {
                       </svg>
                     ))}
                     <span className="text-sm text-neutral-500">({rating}/5)</span>
+                    {orderedCount > 0 && (
+                      <span className="text-sm text-neutral-500">
+                        {orderedCount} {orderedCount === 1 ? 'order' : 'orders'}
+                      </span>
+                    )}
                   </div>
                 )}
 
@@ -569,6 +576,11 @@ const Product = () => {
                     </svg>
                   ))}
                   <span className="text-sm text-neutral-500">({rating}/5)</span>
+                  {orderedCount > 0 && (
+                    <span className="text-sm text-neutral-500">
+                      {orderedCount} {orderedCount === 1 ? 'order' : 'orders'}
+                    </span>
+                  )}
                 </div>
               )}
 

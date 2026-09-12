@@ -29,6 +29,7 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
   const [imageFile1, setImageFile1] = useState(null);
   const [imageFile2, setImageFile2] = useState(null);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const orderedCount = Number(product?.order_count ?? 0);
 
   if (!product) return null;
 
@@ -425,9 +426,11 @@ const ProductCard = ({ product, className, hideWishlistButton = false, isWishlis
               <span className="text-sm font-semibold text-neutral-900">{rating}</span>
               <FiStar className="w-4 h-4 text-accent-500 fill-current" />
             </div>
-            {/* <span className="text-xs text-neutral-600">
-              {displayOrders} {displayOrders === 1 ? 'order' : 'orders'}
-            </span> */}
+            {orderedCount > 0 && (
+              <span className="text-xs text-neutral-600">
+                {orderedCount} {orderedCount === 1 ? 'order' : 'orders'}
+              </span>
+            )}
           </div>
         )}
         </div>
